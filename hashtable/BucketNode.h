@@ -9,6 +9,11 @@ using std::cout;
 namespace Seven
 {
 	// node used in bucketlist of a bucket,which is a part of HashTable
+        /*
+	< requirements >
+	1. type T should support default constructor
+	2. type T should support operator =
+	*/
 	template<class T>
 	class BucketNode
 	{

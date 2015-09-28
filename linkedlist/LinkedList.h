@@ -9,6 +9,11 @@ using std::cout;
 namespace Seven
 {
 	// linkedlist
+        /*
+	< requirements >
+	1. type T should support default constructor
+	2. type T should support operator =
+	*/
 	template<class T>
 	class LinkedList
 	{

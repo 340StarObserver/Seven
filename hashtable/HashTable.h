@@ -8,6 +8,11 @@
 namespace Seven
 {
 	// hash table
+        /*
+	< requirements >
+	1. type T should support default constructor
+	2. type T should support operator =
+	*/
 	template<class T>
 	class HashTable
 	{
