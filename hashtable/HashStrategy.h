@@ -18,7 +18,7 @@ namespace Seven
 	public:
 		// hash a string to a integer between [0,module-1]
 		// parament module represent how many buckets a HashTable has
-		virtual size_t hash(const string & key, size_t module) = 0;
+		virtual size_t hash(const string & key, size_t module)const = 0;
 	};
 }
 
