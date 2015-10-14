@@ -34,7 +34,8 @@ namespace Seven
 		// CURD:
 		void push(const T & value);         // push a node to queue tail         (ok)
 		bool pop();                         // pop a node from queue top         (ok)
-		T * front();                        // read the queue top                (ok)
+		T * peek();                         // read the queue top                (ok)
+		T front()const;                     // read the queue top                (ok)
 		bool update(const T & value);       // update the queue top              (ok)
 	};
 
@@ -157,9 +158,20 @@ namespace Seven
 	use the linkedlist for agency to get value of its real head node
 	*/
 	template<class T>
-	T * Queue<T>::front()
+	T * Queue<T>::peek()
 	{
 		return _list->readHead();
+	}
+
+
+	// read the queue top
+	/*
+	different from "peek()",this function return value rather than address
+	*/
+	template<class T>
+	T Queue<T>::front()const
+	{
+		return _list->head();
 	}
 
 

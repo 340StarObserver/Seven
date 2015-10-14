@@ -35,6 +35,7 @@ namespace Seven
 		void push(const T & value);         // push a node to the stack     (ok)
 		bool pop();                         // pop a node from stack top    (ok)
 		T * peek();                         // read the stack top           (ok)
+		T top()const;                       // read the stack top           (ok)
 		bool update(const T & value);       // update the stack top         (ok)
 	};
 
@@ -154,12 +155,23 @@ namespace Seven
 
 	// read the stack top
 	/*
-	use the linkedlist for agency to get the value of the real head node
+	use the linkedlist for agency to get value address of the real head node
 	*/
 	template<class T>
 	T * Stack<T>::peek()
 	{
 		return _list->readHead();
+	}
+
+
+	// read the stack top
+	/*
+	different from "peek()", this function return the value rather than address
+	*/
+	template<class T>
+	T Stack<T>::top()const
+	{
+		return _list->head();
 	}
 
 

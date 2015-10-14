@@ -9,7 +9,7 @@ using std::cout;
 namespace Seven
 {
 	// linkedlist
-    /*
+	/*
 	< requirements >
 	1. type T should support default constructor
 	2. type T should support operator =
@@ -51,8 +51,10 @@ namespace Seven
 		bool updateTail(const T & value);                // update value of real tail   (ok)
 
 		// R:
-		T * readHead();                                  // get value of real head node (ok)
-		T * readTail();                                  // get value of real tail node (ok)
+		T * readHead();                                  // get value address of head   (ok)
+		T * readTail();                                  // get value address of tail   (ok)
+		T head()const;                                   // get value of head           (ok)
+		T tail()const;                                   // get value of tail           (ok)
 
 		// D:
 		bool removeHead();                               // remove the real head node   (ok)
@@ -291,7 +293,7 @@ namespace Seven
 	}
 
 
-	// get value of real head node
+	// get value address of real head node
 	/*
 	if the list is empty:
 	   return null
@@ -307,7 +309,7 @@ namespace Seven
 	}
 
 
-	// get value of real tail node
+	// get value address of real tail node
 	/*
 	if the list is empty:
 	   return null
@@ -320,6 +322,22 @@ namespace Seven
 		if (_size > 0)
 			return _tail->getPre()->getValue();
 		return nullptr;
+	}
+
+
+	// get head value
+	template<class T>
+	T LinkedList<T>::head()const
+	{
+		return _head->getNext()->value();
+	}
+
+
+	// get tail value
+	template<class T>
+	T LinkedList<T>::tail()const
+	{
+		return _tail->getPre()->value();
 	}
 
 

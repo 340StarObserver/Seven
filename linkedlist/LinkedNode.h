@@ -26,7 +26,8 @@ namespace Seven
 		void toTail(void(*showT)(const T & value))const;  // print from itself to tail      (ok)
 
 		// get:
-		T * getValue();                                   // get value                      (ok)
+		T * getValue();                                   // get value address              (ok)
+		T value()const;                                   // get value                      (ok)
 		LinkedNode<T> * getPre()const;                    // get address of its pre node    (ok)
 		LinkedNode<T> * getNext()const;                   // get address of its next node   (ok)
 
@@ -86,11 +87,18 @@ namespace Seven
 		}
 	}
 
-	// get value
+	// get value address
 	template<class T>
 	T * LinkedNode<T>::getValue()
 	{
 		return &_value;
+	}
+
+	// get value
+	template<class T>
+	T LinkedNode<T>::value()const
+	{
+		return _value;
 	}
 
 	// get address of its pre node
