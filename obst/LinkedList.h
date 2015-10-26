@@ -86,15 +86,14 @@ namespace Seven
 			void operator -- (int);                     // to pre location(suffix)         (ok)
 			bool operator == (const Iterator & it)const;// iterator equal                  (ok)
 			bool operator != (const Iterator & it)const;// iterator not equal              (ok)
-			// C:
-			bool addPre(const T & value);               // cur location add pre node       (ok)
-			bool addNext(const T & value);              // cur location add next node      (ok)
 			// U:
 			bool update(const T & value);               // update value of cur location    (ok)
 			// R:
 			T * read();                                 // get value of current location   (ok)
 			// D:
 			bool remove();                              // remove the current location     (ok)
+			// execute a task:
+			bool execute(bool(*task)(T * value));       // current node execute a task     (ok)
 		};
 	};
 
@@ -565,46 +564,16 @@ namespace Seven
 	}
 
 
-	// current location add a pre node
+	// current node execute a task
 	/*
-	any location ¡Ê [ begin, end ] all can add a pre node
-	1. use the current location to add a pre node
-	2. increase the size
-	3. return true
+	the parament "task" is a function,
+	task return true represents it executes successfully,
+	task return false represents it executes failed
 	*/
 	template<class T>
-	bool LinkedList<T>::Iterator::addPre(const T & value)
+	bool LinkedList<T>::Iterator::execute(bool(*task)(T * value))
 	{
-		_location->addPre(value);
-		_curSize++;
-		return true;
-	}
-
-
-	// current location add a next node
-	/*
-	any location ¡Ê [ begin, end ) can add a next node, that is,
-	if current location is not the "end",it can add a next node
-	so, the process:
-	if current location is not the "end"
-	{
-	   use the current location to add a next node
-	   increase the size
-	   return true
-	}
-	else
-	   return false
-	*/
-	template<class T>
-	bool LinkedList<T>::Iterator::addNext(const T & value)
-	{
-		if (_location->getNext())
-		{
-			_location->addNext(value);
-			_curSize++;
-			return true;
-		}
-		return false;
+		return task(_location->getValue());
 	}
 
 }
