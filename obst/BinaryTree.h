@@ -52,10 +52,143 @@ namespace Seven
 		bool contains(const T & value, int(*compare)(const T & left, const T & right))const;
 		                                                         // remove element      (ok)
 		bool remove(const T & value, int(*compare)(const T & left, const T & right));
+
+		// declare iterators:
+		class PreOrderIterator;                                // iterator by   preOrder(ok)
+		class InOrderIterator;                                 // iterator by   inOrder (ok)
+		class PostOrderIterator;                               // iterator by  postOrder(ok)
+		class LevelOrderIterator;                              // iterator by levelOrder(ok)
+
+
+		PreOrderIterator preOrderBegin()                // begin of pre order iterator  (ok)
+		{
+			return PreOrderIterator(_root);
+		}
+
+		PreOrderIterator preOrderEnd()                  // end of pre order iterator    (ok)
+		{
+			return PreOrderIterator(nullptr);
+		}
+
+		InOrderIterator inOrderBegin()                  // begin of in order iterator   (ok)
+		{
+			return InOrderIterator(_root);
+		}
+
+		InOrderIterator inOrderEnd()                    // end of in order iterator     (ok)
+		{
+			return InOrderIterator(nullptr);
+		}
+
+		PostOrderIterator postOrderBegin()              // begin of post order iterator (ok)
+		{
+			return PostOrderIterator(_root);
+		}
+
+		PostOrderIterator postOrderEnd()                // end of post order iterator   (ok)
+		{
+			return PostOrderIterator(nullptr);
+		}
+
+		LevelOrderIterator levelOrderBegin()            // begin of level order iterator(ok)
+		{
+			return LevelOrderIterator(_root);
+		}
+
+		LevelOrderIterator levelOrderEnd()              // end of level order iterator  (ok)
+		{
+			return LevelOrderIterator(nullptr);
+		}
+
+		// iterator by pre order
+		class PreOrderIterator
+		{
+		private:
+			Stack<BinaryTreeNode<T> *> S;                        // node stack
+		public:
+			// constructor
+			PreOrderIterator(BinaryTreeNode<T> * root);          // constructor         (ok)
+			// operators
+			void operator ++ ();                                 // prefix ++           (ok)
+			void operator ++ (int);                              // postfix ++          (ok)
+			bool operator == (const PreOrderIterator & it)const; // operator ==         (ok)
+			bool operator != (const PreOrderIterator & it)const; // opreator !=         (ok)
+			// read
+			T * read();                                          // read element        (ok)
+			// update
+			bool update(const T & value);                        // update current node (ok)
+			// execute
+			bool execute(bool(*task)(T * value));                // execute a task      (ok)
+		};
+
+		// iterator by in order
+		class InOrderIterator
+		{
+		private:
+			Stack<BinaryTreeNode<T> *> S;                        // node stack
+		public:
+			// constructor
+			InOrderIterator(BinaryTreeNode<T> * root);           // constructor         (ok)
+			// operations
+			void operator ++ ();                                 // prefix ++           (ok)
+			void operator ++ (int);                              // postfix ++          (ok)
+			bool operator == (const InOrderIterator & it)const;  // operator ==         (ok)
+			bool operator != (const InOrderIterator & it)const;  // opreator !=         (ok)
+			// read
+			T * read();                                          // read element        (ok)   
+			// update
+			bool update(const T & value);                        // update current node (ok)
+			// execute
+			bool execute(bool(*task)(T * value));                // execute a task      (ok)
+		};
+
+		// iterator by post order
+		class PostOrderIterator
+		{
+		private:
+			Stack<BinaryTreeNode<T> *> A;                        // node stack
+			Stack<char> B;                                       // state stack
+		public:
+			// constructor
+			PostOrderIterator(BinaryTreeNode<T> * root);         // constructor         (ok)
+			// operators
+			void operator ++ ();                                 // prefix ++           (ok)
+			void operator ++ (int);                              // postfix ++          (ok)
+			bool operator == (const PostOrderIterator & it)const;// operator ==         (ok)
+			bool operator != (const PostOrderIterator & it)const;// opreator !=         (ok)
+			// read
+			T * read();                                          // read element        (ok)
+			// update
+			bool update(const T & value);                        // update current node (ok)
+			// execute
+			bool execute(bool(*task)(T * value));                // execute a task      (ok)
+		};
+
+		// iterator by level order
+		class LevelOrderIterator
+		{
+		private:
+			Queue<BinaryTreeNode<T> *> Q;                        // node queue
+		public:
+			// constructor
+			LevelOrderIterator(BinaryTreeNode<T> * root);        // constructor         (ok)
+			// operations
+			void operator ++ ();                                 // prefix ++           (ok)
+			void operator ++ (int);                              // prefix ++           (ok)
+			bool operator == (const LevelOrderIterator & it)const;// operator ==        (ok)
+			bool operator != (const LevelOrderIterator & it)const;// operator !=        (ok)
+			// read
+			T * read();                                          // read element        (ok)
+			// update
+			bool update(const T & value);                        // update current node (ok)
+			// execute
+			bool execute(bool(*task)(T * value));                // execute a task      (ok)
+		};
+
 	};
 
 	//----------------------------------------
-	// implements:
+	// implements of tree:
 
 	// default constructor
 	template<class T>
@@ -576,6 +709,484 @@ namespace Seven
 		return true;
 	}
 
+
+	//----------------------------------------
+	// implements of pre order iterator:
+
+	// constructor
+	/*
+	it parament "root" is not null, it will be the first node to be visited in pre order
+	*/
+	template<class T>
+	BinaryTree<T>::PreOrderIterator::PreOrderIterator(BinaryTreeNode<T> * root)
+	{
+		if (root)
+			S.push(root);
+	}
+
+	// prefix ++
+	/*
+	the next node to be visited is its left child
+	*/
+	template<class T>
+	void BinaryTree<T>::PreOrderIterator::operator ++ ()
+	{
+		if (!S.empty())
+		{
+			BinaryTreeNode<T> * p = S.top();
+			S.pop();
+			if (p->getRight())
+				S.push(p->getRight());
+			if (p->getLeft())
+				S.push(p->getLeft());
+		}
+	}
+
+	// postfix ++
+	/*
+	the next node to be visited is its left child
+	*/
+	template<class T>
+	void BinaryTree<T>::PreOrderIterator::operator ++ (int)
+	{
+		this->operator++();
+	}
+
+	// operator ==
+	/*
+	if both are at end(that is the stack is empty), they are equal
+	if both are not at end(that is the stack is not empty), compare their current node
+	if one is empty and the other is not, they are not equal
+	*/
+	template<class T>
+	bool BinaryTree<T>::PreOrderIterator::operator == (const PreOrderIterator & it)const
+	{
+		if (S.empty() && it.S.empty())
+			return true;
+		if (!S.empty() && !it.S.empty())
+		{
+			BinaryTreeNode<T> * p1 = S.top();
+			BinaryTreeNode<T> * p2 = it.S.top();
+			return p1 == p2;
+		}
+		return false;
+	}
+
+	// operator !=
+	template<class T>
+	bool BinaryTree<T>::PreOrderIterator::operator != (const PreOrderIterator & it)const
+	{
+		return !(*this == it);
+	}
+
+	// read
+	/*
+	if it is not at the end(that is the stack is not empty),return its value address
+	*/
+	template<class T>
+	T * BinaryTree<T>::PreOrderIterator::read()
+	{
+		if (S.empty())
+			return nullptr;
+		BinaryTreeNode<T> * p = S.top();
+		return p->getValue();
+	}
+
+	// update
+	template<class T>
+	bool BinaryTree<T>::PreOrderIterator::update(const T & value)
+	{
+		if (S.empty())
+			return false;
+		BinaryTreeNode<T> * p = S.top();
+		p->setValue(value);
+		return true;
+	}
+
+	// execute a task
+	/*
+	if it is not at the end(that is the stack is not empty),let its value execute the task
+	*/
+	template<class T>
+	bool BinaryTree<T>::PreOrderIterator::execute(bool(*task)(T * value))
+	{
+		if (S.empty())
+			return false;
+		BinaryTreeNode<T> * p = S.top();
+		return task(p->getValue());
+	}
+
+
+	//----------------------------------------
+	// implements of in order iterator:
+
+	// constructor
+	/*
+	it parament "root" is not null:
+	   go left,left,left...until node doesn't have left child
+	   then,that node will be the first to be visited
+	*/
+	template<class T>
+	BinaryTree<T>::InOrderIterator::InOrderIterator(BinaryTreeNode<T> * root)
+	{
+		BinaryTreeNode<T> * p = root;
+		while (p)
+		{
+			S.push(p);
+			p = p->getLeft();
+		}
+	}
+
+	// prefix ++
+	/*
+	if current node has right child:
+	   go to its right child
+	   then go left,left...until node doesn't have left child
+	   then that node will be the next to be visited
+	*/
+	template<class T>
+	void BinaryTree<T>::InOrderIterator::operator ++ ()
+	{
+		if (!S.empty())
+		{
+			BinaryTreeNode<T> * p = S.top();
+			S.pop();
+			p = p->getRight();
+			while (p)
+			{
+				S.push(p);
+				p = p->getLeft();
+			}
+		}
+	}
+
+	// postfix ++
+	template<class T>
+	void BinaryTree<T>::InOrderIterator::operator ++ (int)
+	{
+		this->operator++();
+	}
+
+	// operator ==
+	/*
+	if both are at end(that is the stack is empty), they are equal
+	if both are not at end(that is the stack is not empty), compare their current node
+	if one is empty and the other is not, they are not equal
+	*/
+	template<class T>
+	bool BinaryTree<T>::InOrderIterator::operator == (const InOrderIterator & it)const
+	{
+		if (S.empty() && it.S.empty())
+			return true;
+		if (!S.empty() && !it.S.empty())
+		{
+			BinaryTreeNode<T> * p1 = S.top();
+			BinaryTreeNode<T> * p2 = it.S.top();
+			return p1 == p2;
+		}
+		return false;
+	}
+
+	// operator !=
+	template<class T>
+	bool BinaryTree<T>::InOrderIterator::operator != (const InOrderIterator & it)const
+	{
+		return !(*this == it);
+	}
+
+	// read
+	/*
+	if it is not at the end(that is the stack is not empty),return its value address
+	*/
+	template<class T>
+	T * BinaryTree<T>::InOrderIterator::read()
+	{
+		if (S.empty())
+			return nullptr;
+		BinaryTreeNode<T> * p = S.top();
+		return p->getValue();
+	}
+
+	// update
+	template<class T>
+	bool BinaryTree<T>::InOrderIterator::update(const T & value)
+	{
+		if (S.empty())
+			return false;
+		BinaryTreeNode<T> * p = S.top();
+		p->setValue(value);
+		return true;
+	}
+
+	// execute a task
+	/*
+	if it is not at the end(that is the stack is not empty),let its value execute the task
+	*/
+	template<class T>
+	bool BinaryTree<T>::InOrderIterator::execute(bool(*task)(T * value))
+	{
+		if (S.empty())
+			return false;
+		BinaryTreeNode<T> * p = S.top();
+		return task(p->getValue());
+	}
+
+
+	//----------------------------------------
+	// implements of post order iterator:
+
+	// constructor
+	/*
+	1. if node has left child: go to left child
+	   else if node has right child: go to right child
+	2. circually do 1, until node has no child
+	3. then the node is the first to be visited
+	*/
+	template<class T>
+	BinaryTree<T>::PostOrderIterator::PostOrderIterator(BinaryTreeNode<T> * root)
+	{
+		BinaryTreeNode<T> * p = root;
+		while (p)
+		{
+			A.push(p);
+			B.push('1');
+			p = (p->getLeft() ? p->getLeft() : p->getRight());
+		}
+		if (!B.empty())
+		{
+			char * topB = B.peek();
+			*topB = '2';
+		}
+	}
+
+	// prefix ++
+	/*
+	1. A.pop() B.pop()
+	2. while A is not empty:
+	      note A's top as topA
+		  note B's top as topB
+	      if topB is 0:
+			 set topB to 1
+		     push topA's left child to A
+			 push 0 to B
+		  else if topB is 1:
+			 set topB to 2
+			 push topA's left child to A
+			 push 0 to B
+		  else:
+			 break
+	*/
+	template<class T>
+	void BinaryTree<T>::PostOrderIterator::operator ++ ()
+	{
+		A.pop();
+		B.pop();
+		BinaryTreeNode<T> * topA = nullptr;
+		char * topB = nullptr;
+		while (!A.empty())
+		{
+			topA = A.top();
+			topB = B.peek();
+			if (*topB == '0')
+			{
+				*topB = '1';
+				if (topA->getLeft())
+				{
+					A.push(topA->getLeft());
+					B.push('0');
+				}
+			}
+			else if (*topB == '1')
+			{
+				*topB = '2';
+				if (topA->getRight())
+				{
+					A.push(topA->getRight());
+					B.push('0');
+				}
+			}
+			else
+				break;
+		}
+	}
+
+	// postfix ++
+	template<class T>
+	void BinaryTree<T>::PostOrderIterator::operator ++ (int)
+	{
+		this->operator++();
+	}
+
+	// operator ==
+	/*
+	if both A and it.A are empty: they are equal
+	if both A and it.A are not empty:
+	   if A.top==it.A.top and B.top==it.B.top:they are equal
+	   else: they are not equal
+	if one is empty and the other is not: they are not equal
+	*/
+	template<class T>
+	bool BinaryTree<T>::PostOrderIterator::operator == (const PostOrderIterator & it)const
+	{
+		if (A.empty() && it.A.empty())
+			return true;
+		if (!A.empty() && !it.A.empty())
+		{
+			BinaryTreeNode<T> * p1 = A.top();
+			BinaryTreeNode<T> * p2 = it.A.top();
+			char c1 = B.top();
+			char c2 = it.B.top();
+			return p1 == p2 && c1 == c2;
+		}
+		return false;
+	}
+
+	// operator !=
+	template<class T>
+	bool BinaryTree<T>::PostOrderIterator::operator != (const PostOrderIterator & it)const
+	{
+		return !(*this == it);
+	}
+
+	// read
+	/*
+	if it is not the end(that is stack is not empty): return its value address
+	*/
+	template<class T>
+	T * BinaryTree<T>::PostOrderIterator::read()
+	{
+		if (A.empty())
+			return nullptr;
+		BinaryTreeNode<T> * p = A.top();
+		return p->getValue();
+	}
+
+	// update
+	template<class T>
+	bool BinaryTree<T>::PostOrderIterator::update(const T & value)
+	{
+		if (A.empty())
+			return false;
+		BinaryTreeNode<T> * p = A.top();
+		p->setValue(value);
+		return true;
+	}
+
+	// execute a task
+	/*
+	if it is not at the end(that is the stack is not empty),let its value execute the task
+	*/
+	template<class T>
+	bool BinaryTree<T>::PostOrderIterator::execute(bool(*task)(T * value))
+	{
+		if (A.empty())
+			return false;
+		BinaryTreeNode<T> * p = A.top();
+		return task(p->getValue());
+	}
+
+
+	//----------------------------------------
+	// implements of post order iterator:
+
+	// constructor
+	/*
+	it parament "root" is not null, it will be the first node to be visited in pre order
+	*/
+	template<class T>
+	BinaryTree<T>::LevelOrderIterator::LevelOrderIterator(BinaryTreeNode<T> * root)
+	{
+		if (root)
+			Q.push(root);
+	}
+
+	// prefix ++
+	template<class T>
+	void BinaryTree<T>::LevelOrderIterator::operator ++ ()
+	{
+		if (!Q.empty())
+		{
+			BinaryTreeNode<T> * p = Q.front();
+			Q.pop();
+			if (p->getLeft())
+				Q.push(p->getLeft());
+			if (p->getRight())
+				Q.push(p->getRight());
+		}
+	}
+
+	// postfix ++
+	template<class T>
+	void BinaryTree<T>::LevelOrderIterator::operator ++ (int)
+	{
+		this->operator++();
+	}
+
+	// operator ==
+	/*
+	if both Q and it.Q are empty: they are equal
+	if both they are not empty:
+	   if Q.top==it.Q.top: they are equal
+	   else: they are not equal
+	if one is empty and the other is not: they are not equal
+	*/
+	template<class T>
+	bool BinaryTree<T>::LevelOrderIterator::operator == (const LevelOrderIterator & it)const
+	{
+		if (Q.empty() && it.Q.empty())
+			return true;
+		if (!Q.empty() && !it.Q.empty())
+		{
+			BinaryTreeNode<T> * p1 = Q.front();
+			BinaryTreeNode<T> * p2 = it.Q.front();
+			return p1 == p2;
+		}
+		return false;
+	}
+
+	// operator !=
+	template<class T>
+	bool BinaryTree<T>::LevelOrderIterator::operator != (const LevelOrderIterator & it)const
+	{
+		return !(*this == it);
+	}
+
+	// read
+	/*
+	if it is not the end(that is queue is not empty): return its value address
+	*/
+	template<class T>
+	T * BinaryTree<T>::LevelOrderIterator::read()
+	{
+		if (Q.empty())
+			return nullptr;
+		BinaryTreeNode<T> * p = Q.front();
+		return p->getValue();
+	}
+
+	// update
+	template<class T>
+	bool BinaryTree<T>::LevelOrderIterator::update(const T & value)
+	{
+		if (Q.empty())
+			return false;
+		BinaryTreeNode<T> * p = Q.front();
+		p->setValue(value);
+		return true;
+	}
+
+	// execute a task
+	/*
+	if it is not at the end(that is the queue is not empty),let its value execute the task
+	*/
+	template<class T>
+	bool BinaryTree<T>::LevelOrderIterator::execute(bool(*task)(T * value))
+	{
+		if (Q.empty())
+			return false;
+		BinaryTreeNode<T> * p = Q.front();
+		return task(p->getValue());
+	}
 
 }
 
