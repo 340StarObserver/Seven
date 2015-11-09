@@ -11,8 +11,16 @@ namespace Seven
 	// binary tree
 	/*
 	< requirements >
-	1. type T should support default constructor
-	2. type T should support operator =
+	   1. type T should support default constructor
+	   2. type T should support operator =
+	< !!!!!!! tips >
+	   1. replace(), put() are recommended to use only when T=(Key,Value)
+	   2. when T=(Key,Value):
+	      the paraliment "compare" used to compare their Keys
+	      the difference between insert(), replace(), put() :
+	          insert : if not has the same Key,then add this (Key,Value)
+			  replace: if has the same Key,then update its Value
+			  put    : if has the same Key,then update its Value,else add this (Key,Value)
 	*/
 	template<class T>
 	class BinaryTree
@@ -52,6 +60,10 @@ namespace Seven
 		bool contains(const T & value, int(*compare)(const T & left, const T & right))const;
 		                                                         // remove element      (ok)
 		bool remove(const T & value, int(*compare)(const T & left, const T & right));
+		                                                         // replace (key,value) (ok)
+		bool replace(const T & oldvalue, const T & newvalue, int(*compare)(const T & left, const T & right));
+		                                                         // put (key,value)     (ok)
+		void put(const T & value, int(*compare)(const T & left, const T & right));
 
 		// declare iterators:
 		class PreOrderIterator;                                // iterator by   preOrder(ok)
@@ -707,6 +719,55 @@ namespace Seven
 		}
 		_size--;
 		return true;
+	}
+
+
+	// replace (key,value)
+	/*
+	!-- requirements:
+	    1. this function only used when T=(Key,Value)
+		2. the paraliment "compare" is to compare Key between two object of T
+		3. the paraliment "oldvalue" and "newvalue" should have the same Key,that is,
+		   compare(oldvalue,newvalue)==0
+		4. Value of oldvalue is anything OK,oldvalue only is used to provide its Key
+	if exist such a (Key,Value)=oldvalue,update it with newvalue
+	*/
+	template<class T>
+	bool BinaryTree<T>::replace(const T & oldvalue, const T & newvalue, int(*compare)(const T & left, const T & right))
+	{
+		if (compare(oldvalue, newvalue) != 0)
+			return false;
+		BinaryTreeNode<T> * p = _root;
+		int t;
+		while (p)
+		{
+			t = compare(oldvalue, p->value());
+			if (t == 0)
+			{
+				p->setValue(newvalue);
+				return true;
+			}
+			p = (t < 0 ? p->getLeft() : p->getRight());
+		}
+		return false;
+	}
+
+
+	// put (Key,Value)
+	/*
+	!-- requirements:
+	    1. this function only used when T=(Key,Value)
+	    2. the paraliment "compare" is to compare Key between two object of T
+	if tree has a node which Key is the same as value's Key:
+	   then update the node's value with value's Value
+	if tree has not such a node:
+	   then insert (Key,Value)
+	*/
+	template<class T>
+	void BinaryTree<T>::put(const T & value, int(*compare)(const T & left, const T & right))
+	{
+		if (!replace(value, value, compare))
+			insert(value, compare);
 	}
 
 
