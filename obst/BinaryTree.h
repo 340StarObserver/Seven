@@ -19,8 +19,8 @@ namespace Seven
 	      the paraliment "compare" used to compare their Keys
 	      the difference between insert(), replace(), put() :
 	          insert : if not has the same Key,then add this (Key,Value)
-			  replace: if has the same Key,then update its Value
-			  put    : if has the same Key,then update its Value,else add this (Key,Value)
+	          replace: if has the same Key,then update its Value
+		  put    : if has the same Key,then update its Value,else add this (Key,Value)
 	*/
 	template<class T>
 	class BinaryTree
