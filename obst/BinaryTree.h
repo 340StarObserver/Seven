@@ -30,6 +30,9 @@ namespace Seven
 		size_t _size;               // the size of the tree
 	private:
 		static BinaryTreeNode<T> * copySubTree(BinaryTreeNode<T> * p); // copy sub tree (ok)
+		void rmDegreeZero(BinaryTreeNode<T> * p); // remove a node whose degree is zero (ok)
+		void rmDegreeOne(BinaryTreeNode<T> * p);  // remove a node whose degree is one  (ok)
+		void rmDegreeTwo(BinaryTreeNode<T> * p);  // remove a node whose degree is two  (ok)
 	public:
 		// constructors:
 		BinaryTree();                                            // default constructor (ok)
@@ -58,12 +61,12 @@ namespace Seven
 		bool insert(const T & value, int(*compare)(const T & left, const T & right));
 		                                                         // search element      (ok)
 		bool contains(const T & value, int(*compare)(const T & left, const T & right))const;
-		                                                         // remove element      (ok)
-		bool remove(const T & value, int(*compare)(const T & left, const T & right));
 		                                                         // replace (key,value) (ok)
 		bool replace(const T & oldvalue, const T & newvalue, int(*compare)(const T & left, const T & right));
 		                                                         // put (key,value)     (ok)
 		void put(const T & value, int(*compare)(const T & left, const T & right));
+		                                                         // remove element      (ok)
+		bool remove(const T & value, int(*compare)(const T & left, const T & right));
 
 		// declare iterators:
 		class PreOrderIterator;                                // iterator by   preOrder(ok)
@@ -618,8 +621,7 @@ namespace Seven
 	bool BinaryTree<T>::insert(const T & value, int(*compare)(const T & left, const T & right))
 	{
 		BinaryTreeNode<T> * node = new BinaryTreeNode<T>(value);
-		if (_size == 0)
-		{
+		if (_size == 0){
 			_root = node;
 			_size = 1;
 			return true;
@@ -627,30 +629,24 @@ namespace Seven
 		BinaryTreeNode<T> * p = _root;
 		bool w;
 		int res;
-		while (1)
-		{
+		while (1){
 			res = compare(value, p->value());
-			if (res == 0)
-			{
+			if (res == 0){
 				delete node;
 				return false;
 			}
-			if (res < 0)
-			{
+			if (res < 0){
 				if (p->getLeft())
 					p = p->getLeft();
-				else
-				{
+				else{
 					w = false;
 					break;
 				}
 			}
-			else
-			{
+			else{
 				if (p->getRight())
 					p = p->getRight();
-				else
-				{
+				else{
 					w = true;
 					break;
 				}
@@ -662,62 +658,6 @@ namespace Seven
 		else
 			p->setLeft(node);
 		_size++;
-		return true;
-	}
-
-
-	// remove element based on the value of node
-	/*
-	note the node which needs to be removed as "p"
-	there are some conditions according to p (when p exists)
-	1. p is the root, and p has no child
-	2. p is the root, and p has left chld
-	3. p is the root, and p has right child
-	4. p is not the root
-	*/
-	template<class T>
-	bool BinaryTree<T>::remove(const T & value, int(*compare)(const T & left, const T & right))
-	{
-		BinaryTreeNode<T> * p = _root;
-		int res;
-		while (p)
-		{
-			res = compare(value, p->value());
-			if (res == 0)
-				break;
-			p = (res < 0 ? p->getLeft() : p->getRight());
-		}
-		if (!p)
-			return false;
-		if (p == _root)
-		{
-			BinaryTreeNode<T> * L = p->getLeft();
-			BinaryTreeNode<T> * R = p->getRight();
-			if (!L && !R)
-			{
-				delete _root;
-				_root = nullptr;
-			}
-			else if (L)
-			{
-				L->rmParent();
-				_root = L;
-			}
-			else
-			{
-				R->rmParent();
-				_root = R;
-			}
-		}
-		else
-		{
-			BinaryTreeNode<T> * t = p->getParent();
-			if (t->getLeft() == p)
-				t->rmLeft();
-			else
-				t->rmRight();
-		}
-		_size--;
 		return true;
 	}
 
@@ -766,8 +706,141 @@ namespace Seven
 	template<class T>
 	void BinaryTree<T>::put(const T & value, int(*compare)(const T & left, const T & right))
 	{
-		if (!replace(value, value, compare))
-			insert(value, compare);
+		if (_size == 0){
+			_root = new BinaryTreeNode<T>(value);
+			_size = 1;
+			return;
+		}
+		BinaryTreeNode<T> * p = _root;
+		BinaryTreeNode<T> * tmp = nullptr;
+		int t;
+		while (p){
+			tmp = p;
+			t = compare(value, p->value());
+			if (t == 0){
+				p->setValue(value);
+				return;
+			}
+			p = (t < 0 ? p->getLeft() : p->getRight());
+		}
+		p = new BinaryTreeNode<T>(value);
+		p->setParent(tmp);
+		if (t < 0)
+			tmp->setLeft(p);
+		else
+			tmp->setRight(p);
+		_size++;
+	}
+
+
+	// remove a node whose degree is zero
+	/*
+	if p is root:
+		delete root and make root is null
+	else:
+		note p's parent is pp
+		if p is pp's left child : make pp's left child is null
+		if p is pp's right child: make pp's right child is null
+		delete p
+	decrease the size
+	*/
+	template<class T>
+	void BinaryTree<T>::rmDegreeZero(BinaryTreeNode<T> * p)
+	{
+		if (p == _root){
+			delete _root;
+			_root = nullptr;
+		}
+		else{
+			BinaryTreeNode<T> * pp = p->getParent();
+			if (pp->getLeft() == p)
+				pp->setLeft(nullptr);
+			else
+				pp->setRight(nullptr);
+			delete p;
+		}
+		_size--;
+	}
+
+
+	// remove a node whose degree is one
+	/*
+		note p's parent as "pp"
+		note p's child(only one child) as "child"
+		connect "pp" and "child"
+		if p is root: root="child"
+		delete p
+		decrease the size
+	*/
+	template<class T>
+	void BinaryTree<T>::rmDegreeOne(BinaryTreeNode<T> * p)
+	{
+		BinaryTreeNode<T> * pp = p->getParent();
+		BinaryTreeNode<T> * child = (p->getLeft() ? p->getLeft() : p->getRight());
+		child->setParent(pp);
+		if (pp){
+			if (pp->getLeft() == p)
+				pp->setLeft(child);
+			else
+				pp->setRight(child);
+		}
+		else
+			_root = child;
+		delete p;
+		_size--;
+	}
+
+
+	// remove a node whose degree is two
+	/*
+	1. find the biggest node in p's left subtree,note it as "tmp"
+	2. set p's value with tmp's value
+	3. if tmp's degree is zero: rmDegreeZero(tmp)
+	   if tmp's degree is one : rmDegreeOne(tmp)
+	*/
+	template<class T>
+	void BinaryTree<T>::rmDegreeTwo(BinaryTreeNode<T> * p)
+	{
+		BinaryTreeNode<T> * tmp = p->getLeft();
+		while (tmp->getRight())
+			tmp = tmp->getRight();
+
+		p->setValue(tmp->value());
+
+		if (!tmp->getLeft() && !tmp->getRight())
+			rmDegreeZero(tmp);
+		else
+			rmDegreeOne(tmp);
+	}
+
+
+	// remove element from the binary search tree
+	/*
+	1. find the node and note it as "p"
+	2. calculate the degree of p
+	3. if degree=0: rmDegreeZero(p)
+	   if degree=1: rmDegreeOne(p)
+	   if degree=2: rmDegreeTwo(p)
+	*/
+	template<class T>
+	bool BinaryTree<T>::remove(const T & value, int(*compare)(const T & left, const T & right))
+	{
+		BinaryTreeNode<T> * p = _root;
+		int t;
+		while (p){
+			t = compare(value, p->value());
+			if (t == 0){
+				if (p->getLeft() && p->getRight())
+					rmDegreeTwo(p);
+				else if (!p->getLeft() && !p->getRight())
+					rmDegreeZero(p);
+				else
+					rmDegreeOne(p);
+				return true;
+			}
+			p = (t < 0 ? p->getLeft() : p->getRight());
+		}
+		return false;
 	}
 
 
