@@ -39,6 +39,7 @@ namespace Seven
 
 		// attribute
 		bool empty()const;                                // judge empty          (ok)
+		bool full()const;                                 // judge full           (ok)
 		size_t size()const;                               // get current size     (ok)
 
 		// CURD
@@ -169,6 +170,14 @@ namespace Seven
 	bool MaxHeap<T>::empty()const
 	{
 		return _size == 0;
+	}
+
+
+	// judge full
+	template<class T>
+	bool MaxHeap<T>::full()const
+	{
+		return _size == _capacity;
 	}
 
 
