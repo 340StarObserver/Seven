@@ -28,6 +28,8 @@ namespace Seven
 
 		// constructor
 		MaxHeap(size_t capacity = 16);                    // default constructor  (ok)
+		                                                  // initialize
+		MaxHeap(T * values, size_t size, int(*compare)(const T & left, const T & right));
 		MaxHeap(const MaxHeap<T> & heap);                 // copy constructor     (ok)
 		MaxHeap<T> & operator = (const MaxHeap<T> & heap);// operator = overwrite (ok)
 
@@ -37,7 +39,6 @@ namespace Seven
 
 		// attribute
 		bool empty()const;                                // judge empty          (ok)
-		bool full()const;                                 // judge full           (ok)
 		size_t size()const;                               // get current size     (ok)
 
 		// CURD
@@ -76,6 +77,44 @@ namespace Seven
 		_capacity = (capacity > 0 ? capacity : 16);
 		_elements = new T[_capacity + 1];
 		_size = 0;
+	}
+
+
+	// initialize
+	/*
+	1. values[size] is the elements that will consist of nodes of max heap
+	2. compare(const T &,const T &) is used to compare two objects
+	strategy:
+	{
+		modify subtrees whose root index is (size/2,size/2-1,size/2-2,...3,2,1) in turn,
+		to make these subtrees meet the requirement of maxheap;
+		when modify one subtree:
+			with the order from its root to its leaf
+	}
+	*/
+	template<class T>
+	MaxHeap<T>::MaxHeap(T * values, size_t size, int(*compare)(const T & left, const T & right))
+	{
+		_capacity = _size = size;
+		_elements = new T[_capacity + 1];
+		_Copy_impl(values, values + size, _elements + 1);
+		size_t p, q;
+		T e;
+		for (size_t c = size / 2; c > 0; c--){
+			p = c;
+			q = 2 * p;
+			e = _elements[c];
+			while (q <= size){
+				if (q < size && compare(_elements[q], _elements[q + 1]) < 0)
+					q++;
+				if (compare(_elements[q], e) <= 0)
+					break;
+				_elements[p] = _elements[q];
+				p = q;
+				q = q * 2;
+			}
+			_elements[p] = e;
+		}
 	}
 
 
@@ -133,14 +172,6 @@ namespace Seven
 	}
 
 
-	// judge full
-	template<class T>
-	bool MaxHeap<T>::full()const
-	{
-		return _size == _capacity;
-	}
-
-
 	// get the current size of the max heap
 	template<class T>
 	size_t MaxHeap<T>::size()const
@@ -162,6 +193,14 @@ namespace Seven
 
 
 	// push an element
+	/*
+	1. when insert a new element, the path which from this new leaf to root is ascending,
+	so can use binary search to find the location this new element should be at.
+	This complexity is O(loglogN),But,
+	2. after we known where the new element should be at, we should move some elements to make
+	the tree meet max heap.The complexity of move elements is O(logN)
+	3. So, if we use binary search insert,the total complexity is O(loglogN)+O(logN)==O(logN)
+	*/
 	template<class T>
 	void MaxHeap<T>::push(const T & value, int(*compare)(const T & left, const T & right))
 	{
