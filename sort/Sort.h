@@ -1,6 +1,11 @@
 #ifndef _SORT_H
 #define _SORT_H
 
+#include <cstring>
+using std::memset;
+
+using std::_Copy_impl;
+
 namespace Seven
 {
 	// class for sort
@@ -43,6 +48,9 @@ namespace Seven
 
 		// fast sort                     (ok)
 		static void fastSort(T * _array, size_t N, bool(*smallerThan)(const T & t1, const T & t2));
+
+		// winner sort ( N must be 2^k )
+		static void winnerSort(T * _array, size_t N, int(*compare)(const T & t1, const T & t2));
 	};
 
 	//--------------------------------------------------
@@ -216,6 +224,77 @@ namespace Seven
 	void Sort<T>::fastSort(T * _array, size_t N, bool(*smallerThan)(const T & t1, const T & t2))
 	{
 		fastImplement(_array, 0, N - 1, smallerThan);
+	}
+
+
+	// winner sort
+	/*
+	N must be 2^k
+	*/
+	template<class T>
+	void Sort<T>::winnerSort(T * _array, size_t N, int(*compare)(const T & t1, const T & t2))
+	{
+		// 1. build winner tree
+		T * tree = new T[N << 1];
+		_Copy_impl(_array, _array + N, tree + N);
+		int t;
+		size_t l, r, index;
+		for (index = N - 1; index > 0; index--)
+		{
+			l = (index << 1);
+			r = l + 1;
+			t = compare(tree[l], tree[r]);
+			tree[index] = (t <= 0 ? tree[l] : tree[r]);
+		}
+
+		// 2. prepare infinite mark
+		bool * infinite = new bool[N << 1];
+		memset(infinite, 0, (N << 1));
+
+		// 3. prepare space for sorted data
+		T * sorted = new T[N];
+
+		// 4. start
+		sorted[0] = tree[1];
+		for (size_t k = 1; k < N; k++)
+		{
+			index = 1;
+			while (index < N)
+			{
+				l = (index << 1);
+				r = l + 1;
+				if (infinite[l])
+					index = r;
+				else if (infinite[r])
+					index = l;
+				else
+					index = (compare(tree[l], tree[r]) <= 0 ? l : r);
+			}
+			infinite[index] = true;
+			while (index != 1)
+			{
+				index = index / 2;
+				l = (index << 1);
+				r = l + 1;
+				if (infinite[l] && infinite[r])
+					infinite[index] = true;
+				else if (infinite[l] && !infinite[r])
+					tree[index] = tree[r];
+				else if (!infinite[l] && infinite[r])
+					tree[index] = tree[l];
+				else
+					tree[index] = (compare(tree[l], tree[r]) <= 0 ? tree[l] : tree[r]);
+			}
+			sorted[k] = tree[1];
+		}
+
+		// 5. sorted[] -> origin data[]
+		_Copy_impl(sorted, sorted + N, _array);
+
+		// 6. clean rubbish
+		delete[]tree;
+		delete[]infinite;
+		delete[]sorted;
 	}
 
 }
