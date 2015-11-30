@@ -21,6 +21,7 @@ namespace Seven
 	UnionFindSets::UnionFindSets(int size)
 	{
 		_size = (size >= 2 ? size : 16);
+		_representNum = _size;
 		_parents = new int[_size];
 		memset(_parents, -1, sizeof(int)*_size);
 	}
@@ -30,6 +31,7 @@ namespace Seven
 	UnionFindSets::UnionFindSets(const UnionFindSets & sets)
 	{
 		_size = sets._size;
+		_representNum = sets._representNum;
 		_parents = new int[_size];
 		_Copy_impl(sets._parents, sets._parents + _size, _parents);
 	}
@@ -41,6 +43,7 @@ namespace Seven
 		if (this != &sets){
 			delete[]_parents;
 			_size = sets._size;
+			_representNum = sets._representNum;
 			_parents = new int[_size];
 			_Copy_impl(sets._parents, sets._parents + _size, _parents);
 		}
@@ -52,6 +55,7 @@ namespace Seven
 	void UnionFindSets::restore()
 	{
 		memset(_parents, -1, sizeof(int)*_size);
+		_representNum = _size;
 	}
 
 
@@ -69,10 +73,18 @@ namespace Seven
 	}
 
 
+	// get the number of representational elements
+	int UnionFindSets::representNum()const
+	{
+		return _representNum;
+	}
+
+
 	// print the sets
 	void UnionFindSets::show()const
 	{
 		cout << "size: " << _size << '\n';
+		cout << "representational num: " << _representNum << '\n';
 		for (int i = 0; i < _size; i++)
 			cout << "parent[" << i << "]: " << _parents[i] << '\n';
 	}
@@ -108,7 +120,7 @@ namespace Seven
 	// union two sets with their roots
 	/*
 	input : both left and right are roots of sets which they belong to
-	        both left and right are [0,size)
+	        both left and right are [0,size),and left != right
 	strategy:
 		if parent[i] is [0,size):
 			i is not a root,and its parent is parent[i]
@@ -119,14 +131,17 @@ namespace Seven
 	bool UnionFindSets::Union(int left, int right)
 	{
 		if (left >= 0 && left < _size && right >= 0 && right < _size){
-			int tmp = _parents[left] + _parents[right];
-			if (_parents[left] < _parents[right]){
-				_parents[right] = left;
-				_parents[left] = tmp;
-			}
-			else{
-				_parents[left] = right;
-				_parents[right] = tmp;
+			if (left != right){
+				int tmp = _parents[left] + _parents[right];
+				if (_parents[left] < _parents[right]){
+					_parents[right] = left;
+					_parents[left] = tmp;
+				}
+				else{
+					_parents[left] = right;
+					_parents[right] = tmp;
+				}
+				_representNum--;
 			}
 			return true;
 		}

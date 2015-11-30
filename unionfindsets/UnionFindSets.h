@@ -7,8 +7,9 @@ namespace Seven
 	class UnionFindSets
 	{
 	private:
-		int * _parents;  // nodes' parents
-		int _size;       // the number of nodes
+		int * _parents;    // nodes' parents
+		int _size;         // the number of nodes
+		int _representNum; // the number of representational elements
 	public:
 		// constructors:
 		UnionFindSets(int size);         // non-default constructor
@@ -26,6 +27,8 @@ namespace Seven
 
 		// attribute
 		int size()const;                 // get size
+		int representNum()const;         // get the number of representational elements
+		// that is, how many sets in this unionfindsets
 
 		// find
 		int find(int element);           // find the root of a set which "element" belongs to
