@@ -8,8 +8,12 @@
 
 #include "Sort.h"
 
+#include "PriorityQueue.h"
+
 #include <cstring>
 using std::memset;
+
+using std::pair;
 
 namespace Seven
 {
@@ -277,6 +281,255 @@ namespace Seven
 			return thList;
 		delete thList;
 		return nullptr;
+	}
+
+
+	// judge whether vertice "u" is a cut-point
+	/*
+	Tip:
+		this function can be used only when this graph is a connected-graph
+	Method:
+		1. create a unionfindsets called 'UFS'
+		2. push all edges exclude associated with vertice 'u' into UFS
+		3. if the number of representation elements of UFS is more than two:
+			// why is two,because the 'u' is a separate vertice
+			// and 'u' is now not in the graph logically
+			'u' is a cut-point
+	*/
+	bool UndirectedGraph::isCutPoint(size_t u)const
+	{
+		UnionFindSets UFS(_vertices);
+		for (size_t i = 0; i < _vertices; i++){
+			for (size_t j = i + 1; j < _vertices; j++){
+				if (i != u && j != u && contains(i, j))
+					UFS.Union(UFS.find((int)i), UFS.find((int)j));
+			}
+		}
+		return UFS.representNum() > 2;
+	}
+
+
+	// get all the cut points
+	// this function will return a list of the vertices which are cut points
+	LinkedList<size_t> * UndirectedGraph::cutPoints()const
+	{
+		LinkedList<size_t> * list = LinkedList<size_t>::create();
+		bool * visited = new bool[_vertices];
+		bool * isCut = new bool[_vertices];
+		size_t * dfn = new size_t[_vertices];
+		size_t * low = new size_t[_vertices];
+		size_t * parent = new size_t[_vertices];
+		size_t count = 0;
+		memset(visited, false, _vertices);
+		memset(isCut, false, _vertices);
+		memset(parent, 0, _vertices*sizeof(size_t));
+		dfsCutPoints(0, &count, visited, isCut, dfn, low, parent, list);
+		delete[]visited;
+		delete[]isCut;
+		delete[]dfn;
+		delete[]low;
+		delete[]parent;
+		return list;
+	}
+
+
+	// dfs when calculate cut points
+	void UndirectedGraph::dfsCutPoints(size_t root, size_t * count, bool * visited, bool * isCut, size_t * dfn, size_t * low, size_t * parent, LinkedList<size_t> * list)const
+	{
+		size_t children = 0;
+		visited[root] = true;
+		dfn[root] = low[root] = ++*count;
+		for (size_t v = 0; v < _vertices; v++)
+		{
+			if (contains(root, v))
+			{
+				if (!visited[v])
+				{
+					children++;
+					parent[v] = root;
+					dfsCutPoints(v, count, visited, isCut, dfn, low, parent, list);
+					low[root] = (low[root] < low[v] ? low[root] : low[v]);
+					if (((root == 0 && children > 1) || (root != 0 && low[v] >= dfn[root])) && !isCut[root])
+					{
+						list->insertHead(root);
+						isCut[root] = true;
+					}
+				}
+				else if (v != parent[root])
+					low[root] = (low[root] < dfn[v] ? low[root] : dfn[v]);
+			}
+		}
+	}
+
+
+	// judge whether edge(u,v) is a cut-bridge
+	/*
+	Tip:
+		this function can be used only when this graph is a connected-graph
+	Method:
+		1. create a unionfindsets called 'UFS'
+		2. push all edges exclude (u,v) into UFS
+		3. if the number of representation elements of UFS is more than one:
+			'u' is a cut-point
+	*/
+	bool UndirectedGraph::isCutBridge(size_t u, size_t v)const
+	{
+		UnionFindSets UFS(_vertices);
+		for (size_t i = 0; i < _vertices; i++){
+			for (size_t j = i + 1; j < _vertices; j++){
+				if ((i != u || j != v) && (i != v || j != u) && contains(i, j))
+					UFS.Union(UFS.find((int)i), UFS.find((int)j));
+			}
+		}
+		return UFS.representNum() > 1;
+	}
+
+
+	// get all the bridges
+	// this function will return a list of the edges which are bridges
+	LinkedList<Edge> * UndirectedGraph::cutBridges()const
+	{
+		LinkedList<Edge> * list = LinkedList<Edge>::create();
+		bool * visited = new bool[_vertices];
+		size_t * dfn = new size_t[_vertices];
+		size_t * low = new size_t[_vertices];
+		size_t * parent = new size_t[_vertices];
+		size_t count = 0;
+		memset(visited, false, _vertices);
+		memset(parent, 0, _vertices*sizeof(size_t));
+		dfsCutBridges(0, &count, visited, dfn, low, parent, list);
+		delete[]visited;
+		delete[]dfn;
+		delete[]low;
+		delete[]parent;
+		return list;
+	}
+
+
+	// dfs when calculate all bridges
+	void UndirectedGraph::dfsCutBridges(size_t root, size_t * count, bool * visited, size_t * dfn, size_t * low, size_t * parent, LinkedList<Edge> * list)const
+	{
+		size_t children = 0;
+		visited[root] = true;
+		dfn[root] = low[root] = ++*count;
+		for (size_t v = 0; v < _vertices; v++)
+		{
+			if (contains(root, v))
+			{
+				if (!visited[v])
+				{
+					children++;
+					parent[v] = root;
+					dfsCutBridges(v, count, visited, dfn, low, parent, list);
+					low[root] = (low[root] < low[v] ? low[root] : low[v]);
+					if (dfn[root] < low[v])
+						list->insertHead(Edge(root, v, get(root, v)));
+				}
+				else if (v != parent[root])
+					low[root] = (low[root] < dfn[v] ? low[root] : dfn[v]);
+			}
+		}
+	}
+
+
+	// compare two states when calculate min-cost path between two vertices
+	/*
+	the smaller the cost is,the larger the state is
+	*/
+	int compareState(const pair<size_t, int> & left, const pair<size_t, int> & right)
+	{
+		if (left.second < right.second)
+			return 1;
+		if (left.second > right.second)
+			return -1;
+		return 0;
+	}
+
+
+	// min-cost path between vertice 'u' and 'v'
+	/*
+	Tip: 'u' is the beginning, 'v' is the end
+		 it return a linkedlist of each step of this min-cost path
+	     if there is no path between 'u' and 'v',it will return nullptr
+	Method:
+		1. new a priority-queue called 'Q'
+		2. new a array to mark whether each node has been visited called 'visited'
+		3. new a original state(u,0)
+			push it to 'Q'
+			do mark for 'u'
+			assume that state(x,y), x is current position, y is the cost from 'u' to it
+		4. while 'Q' is not empty:
+			fecth the best element from 'Q' called 'cur'
+			visit cur and update the distance[]
+			if cur.position is 'v':
+				"find path"
+			push all the possible states into 'Q',and do mark
+		5. if "find path":
+			use the distance[] to traceback from 'v' to 'u',
+			and put the path into a list
+		6. return the list
+	*/
+	LinkedList<Edge> * UndirectedGraph::optimalPath(size_t u, size_t v)const
+	{
+		PriorityQueue<pair<size_t, int>> Q(_vertices, true);
+
+		bool * visited = new bool[_vertices];
+		memset(visited, false, _vertices);
+
+		int * distance = new int[_vertices];
+		memset(distance, -1, _vertices*sizeof(int));
+
+		pair<size_t, int> cur(u, 0), next;
+		Q.push(cur, compareState);
+
+		bool find = false;
+		int nextCost;
+		while (!Q.empty()){
+			cur = Q.top();
+			Q.pop(compareState);
+
+			visited[cur.first] = true;
+			if (distance[cur.first] == -1 || distance[cur.first] > cur.second)
+				distance[cur.first] = cur.second;
+			if (cur.first == v){
+				find = true;
+				break;
+			}
+
+			for (size_t t = 0; t < _vertices; t++){
+				nextCost = get(cur.first, t);
+				if (nextCost>0 && !visited[t]){
+					next.first = t;
+					next.second = cur.second + nextCost;
+					Q.push(next, compareState);
+				}
+			}
+		}
+		
+		delete[]visited;
+
+		LinkedList<Edge> * list = nullptr;
+		if (find){
+			list = LinkedList<Edge>::create();
+			Edge edge;
+			size_t current = v;
+			while (current != u){
+				for (size_t prev = 0; prev < _vertices; prev++){
+					int nextCost = get(prev, current);
+					if (nextCost > 0 && distance[prev] + nextCost == distance[current]){
+						edge.setBegin(prev);
+						edge.setEnd(current);
+						edge.setWeight(nextCost);
+						list->insertHead(edge);
+						current = prev;
+						break;
+					}
+				}
+			}
+		}
+
+		delete[]distance;
+		return list;
 	}
 
 }
