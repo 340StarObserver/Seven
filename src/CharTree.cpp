@@ -1,5 +1,3 @@
-#include "stdafx.h"
-
 #include "CharTree.h"
 #include "PriorityQueue.h"
 #include "Stack.h"

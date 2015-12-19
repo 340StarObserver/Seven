@@ -1,5 +1,3 @@
-#include "stdafx.h"
-
 #include "AOEnetwork.h"
 #include "Topologic.h"
 

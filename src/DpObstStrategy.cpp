@@ -1,5 +1,3 @@
-#include "stdafx.h"
-
 #include "DpObstStrategy.h"
 
 #include "Stack.h"

@@ -1,5 +1,3 @@
-#include "stdafx.h"
-
 #include "UndirectedGraph.h"
 
 #include "Queue.h"

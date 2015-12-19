@@ -1,5 +1,3 @@
-#include "stdafx.h"
-
 #include "AllPairsPaths.h"
 
 namespace Seven

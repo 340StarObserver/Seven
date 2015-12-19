@@ -1,5 +1,3 @@
-#include "stdafx.h"
-
 #include "Huffleman.h"
 #include <cstring>
 using std::memset;

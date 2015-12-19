@@ -1,5 +1,3 @@
-#include "stdafx.h"
-
 #include "UnionFindSets.h"
 
 #include <cstring>
