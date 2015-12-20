@@ -50,9 +50,13 @@ namespace Seven
 	/*
 	we assume that whose weight is smaller,who is smaller
 	*/
-	bool Edge::smallerThan(const Edge & left, const Edge & right)
+	int Edge::compare(const Edge & left, const Edge & right)
 	{
-		return left.getWeight() < right.getWeight();
+		if(left.getWeight() < right.getWeight())
+			return -1;
+		if(left.getWeight() > right.getWeight())
+			return 1;
+		return 0;
 	}
 
 }

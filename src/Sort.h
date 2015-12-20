@@ -1,300 +1,223 @@
 #ifndef _SORT_H
 #define _SORT_H
 
-#include <cstring>
-using std::memset;
-
 using std::_Copy_impl;
 
 namespace Seven
 {
-	// class for sort
+	// various strategys of sort
 	/*
 	< requirements >
-	1. type T should support default constructor
-	2. type T should support operator =
-	--------------------------------------------------
-	< help >
-	1. _array[]   : the array which waits to be sorted
-	2. N          : the size of the array
-	3. smallerThan: used to compare elements. if t1<t2,return true
+	1.type T should support default constructor
+	2.type T should support operator =
+
+	< tips >
+	1."data":
+		the list you want to sort,and the index of it begins with zero
+	2."N":
+		the number of elements in the list
+	3."compare":
+		the strategy of comparing two elements.
+		compare(left,right)<0 : left<right
+		compare(left,right)=0 : left=right
+		compare(left,right)>0 : left>right
 	*/
 	template<class T>
 	class Sort
 	{
 	private:
-		// merge two arrays              (ok)
-		static void merge(T * _array1, size_t N1, T * _array2, size_t N2, bool(*smallerThan)(const T & t1, const T & t2));
+		// swap two elements
+		static void swap(T & left, T & right);
 
-		// partition                     (ok)
-		// make array[left...right] to: array[left...c-1] <= array[c] <= array[c+1...right]
-		static size_t partition(T * _array, size_t left, size_t right, bool(*smallerThan)(const T & t1, const T & t2));
 
-		// inner implement of fast sort  (ok)
-		static void fastImplement(T * _array, size_t left, size_t right, bool(*smallerThan)(const T & t1, const T & t2));
+		// inner implements of quick sort
+		// data[leftIndex : rightIndex] is to sort
+		static void quickImplement(T * data, size_t leftIndex, size_t rightIndex, int(*compare)(const T & left, const T & right));
 
+
+		// merge two sorted lists
+		/*
+		initlist[l:m] and initlist[m+1:n] are two already sorted list
+		mergelist is the result of the merge of initlist[l:m] and initlist[m+1:n]
+		*/
+		static void merge(T * initlist, T * mergelist, size_t l, size_t m, size_t n, int(*compare)(const T & left, const T & right));
+
+
+		// sublists of size S are merged from initlist to resultlist
+		static void mergePass(T * initlist, T * resultlist, size_t N, size_t S, int(*compare)(const T & left, const T & right));
+
+
+		// adjust a sub heap whose root's index is "root" and max index is "size"
+		static void adjustHeap(T * data, size_t root, size_t size, int(*compare)(const T & left, const T & right));
 	public:
-		// bubble sort                   (ok)
-		static void bubbleSort(T * _array, size_t N, bool(*smallerThan)(const T & t1, const T & t2));
+		// insert sort
+		static void insertSort(T * data, size_t N, int(*compare)(const T & left, const T & right));
 
-		// select sort                   (ok)
-		static void selectSort(T * _array, size_t N, bool(*smallerThan)(const T & t1, const T & t2));
-
-		// insert sort                   (ok)
-		static void insertSort(T * _array, size_t N, bool(*smallerThan)(const T & t1, const T & t2));
-
-		// merge sort                    (ok)
-		static void mergeSort(T * _array, size_t N, bool(*smallerThan)(const T & t1, const T & t2));
-
-		// fast sort                     (ok)
-		static void fastSort(T * _array, size_t N, bool(*smallerThan)(const T & t1, const T & t2));
-
-		// winner sort ( N must be 2^k )
-		static void winnerSort(T * _array, size_t N, int(*compare)(const T & t1, const T & t2));
+		// quick sort
+		static void quickSort(T * data, size_t N, int(*compare)(const T & left, const T & right));
+	
+		// merge sort
+		static void mergeSort(T * data, size_t N, int(*compare)(const T & left, const T & right));
+	
+		// heap sort
+		static void heapSort(T * data, size_t N, int(*compare)(const T & left, const T & right));
 	};
+
 
 	//--------------------------------------------------
 	// implements:
 
-	// bubble sort
+
+	/*
+	method:
+	originally,data[0:0] is a sorted sub list
+	then insert data[1] into data[0:0],to make data[0:1] become a sorted sub list
+	then insert data[2] into data[0:1],to make data[0:2] become a sorted sub list
+	...
+	then insert data[N-1] into data[0:N-2],to make data[0:N-1] become a sorted sub list
+	*/
 	template<class T>
-	void Sort<T>::bubbleSort(T * _array, size_t N, bool(*smallerThan)(const T & t1, const T & t2))
-	{
-		bool w = true;
-		T tmp;
-		for (size_t k = 0; k < N - 1 && w; k++)
-		{
-			w = false;
-			for (size_t i = 0; i < N - 1 - k; i++)
-			{
-				if (smallerThan(_array[i + 1], _array[i]))
-				{
-					w = true;
-					tmp = _array[i];
-					_array[i] = _array[i + 1];
-					_array[i + 1] = tmp;
-				}
-			}
-		}
-	}
-
-
-	// select sort
-	template<class T>
-	void Sort<T>::selectSort(T * _array, size_t N, bool(*smallerThan)(const T & t1, const T & t2))
-	{
-		T tmp, min;
-		size_t j = 0;
-		for (size_t k = 0; k < N - 1; k++)
-		{
-			j = k;
-			min = _array[k];
-			for (size_t i = k + 1; i < N; i++)
-			{
-				if (smaller(_array[i], min))
-				{
-					j = i;
-					min = _array[i];
-				}
-			}
-			if (j != k)
-			{
-				tmp = _array[j];
-				_array[j] = _array[k];
-				_array[k] = tmp;
-			}
-		}
-	}
-
-
-	// insert sort
-	template<class T>
-	void Sort<T>::insertSort(T * _array, size_t N, bool(*smallerThan)(const T & t1, const T & t2))
+	void Sort<T>::insertSort(T * data, size_t N, int(*compare)(const T & left, const T & right))
 	{
 		size_t move = 0;
-		T insert;
+		T e;
 		for (size_t k = 1; k < N; k++)
 		{
-			insert = _array[k];
+			e = data[k];
 			move = k;
-			while (move > 0 && smaller(insert, _array[move - 1]))
+			while (move > 0 && compare(e, data[move - 1]) < 0)
 			{
-				_array[move] = _array[move - 1];
+				data[move] = data[move - 1];
 				move--;
 			}
-			_array[move] = insert;
+			data[move] = e;
 		}
 	}
 
 
-	// merge two arrays
 	template<class T>
-	void Sort<T>::merge(T * _array1, size_t N1, T * _array2, size_t N2, bool(*smallerThan)(const T & t1, const T & t2))
+	void Sort<T>::quickSort(T * data, size_t N, int(*compare)(const T & left, const T & right))
 	{
-		T * tmp = new T[N1 + N2];
-		size_t p = 0, q = 0, c = 0;
-		while (p < N1 && q < N2)
-		{
-			if (smallerThan(_array1[p], _array2[q]))
-				tmp[c++] = _array1[p++];
+		if (N > 1)
+			quickImplement(data, 0, N - 1, compare);
+	}
+
+
+	template<class T>
+	void Sort<T>::swap(T & left, T & right)
+	{
+		T tmp = left;
+		left = right;
+		right = tmp;
+	}
+
+
+	/*
+	method:
+	for example: {26,5,37,1,61,11,59,15,48,19} is the list we want to sort
+	take action to make 26 is at the right location,
+	that is,elements before 26 is smaller than 26,elements after 26 is bigger than 26
+	like this: {11,5,19,1,15,26,59,61,48,37}
+	then use the same method to deal with the two sub lists {11,5,19,1,15} and {59,61,48,37}
+	*/
+	template<class T>
+	void Sort<T>::quickImplement(T * data, size_t leftIndex, size_t rightIndex, int(*compare)(const T & left, const T & right))
+	{
+		size_t i = leftIndex, j = rightIndex + 1;
+		T pivot = data[leftIndex];
+		do{
+			do{
+				i++;
+			} while (compare(data[i], pivot) < 0);
+			do{
+				j--;
+			} while (compare(data[j], pivot) > 0);
+			if (i < j)
+				swap(data[i], data[j]);
+		} while (i < j);
+		swap(data[leftIndex], data[j]);
+		if (leftIndex + 1 < j)
+			quickImplement(data, leftIndex, j - 1, compare);
+		if (j + 1 < rightIndex)
+			quickImplement(data, j + 1, rightIndex, compare);
+	}
+
+
+	/*
+	merge two already sorted lists into one list
+	*/
+	template<class T>
+	void Sort<T>::merge(T * initlist, T * mergelist, size_t l, size_t m, size_t n, int(*compare)(const T & left, const T & right))
+	{
+		size_t c = l, p1 = l, p2 = m + 1;
+		while (p1 <= m && p2 <= n){
+			if (compare(initlist[p1], initlist[p2]) <= 0)
+				mergelist[c++] = initlist[p1++];
 			else
-				tmp[c++] = _array2[q++];
+				mergelist[c++] = initlist[p2++];
 		}
-		while (p < N1)
-			tmp[c++] = _array1[p++];
-		while (q < N2)
-			tmp[c++] = _array2[q++];
-		for (size_t i = 0; i < N1; i++)
-			_array1[i] = tmp[i];
-		for (size_t i = 0; i < N2; i++)
-			_array2[i] = tmp[i + N1];
+		if (p1 <= m)
+			_Copy_impl(initlist + p1, initlist + m + 1, mergelist + c);
+		if (p2 <= n)
+			_Copy_impl(initlist + p2, initlist + n + 1, mergelist + c);
+	}
+
+
+	template<class T>
+	void Sort<T>::mergePass(T * initlist, T * resultlist, size_t N, size_t S, int(*compare)(const T & left, const T & right))
+	{
+		size_t delta = (S << 1), i;
+		for (i = 0; i + delta <= N; i += delta)
+			merge(initlist, resultlist, i, i + S - 1, i + delta - 1, compare);
+		if (i + S < N)
+			merge(initlist, resultlist, i, i + S - 1, N - 1, compare);
+		else
+			_Copy_impl(initlist + i, initlist + N, resultlist + i);
+	}
+
+
+	template<class T>
+	void Sort<T>::mergeSort(T * data, size_t N, int(*compare)(const T & left, const T & right))
+	{
+		T * tmp = new T[N];
+		for (size_t l = 1; l < N; l = (l << 1))
+		{
+			mergePass(data, tmp, N, l, compare);
+			l = (l << 1);
+			mergePass(tmp, data, N, l, compare);
+		}
 		delete[]tmp;
 	}
 
 
-	// merge sort
 	template<class T>
-	void Sort<T>::mergeSort(T * _array, size_t N, bool(*smallerThan)(const T & t1, const T & t2))
+	void Sort<T>::heapSort(T * data, size_t N, int(*compare)(const T & left, const T & right))
 	{
-		if (N > 1)
+		size_t k;
+		for (k = (N >> 1) - 1; k >= 0 && k < N; k--)
+			adjustHeap(data, k, N, compare);
+		for (k = N - 1; k > 0; k--)
 		{
-			size_t center = N / 2;
-			mergeSort(_array, center, smallerThan);
-			mergeSort(_array + center, N - center, smallerThan);
-			merge(_array, center, _array + center, N - center, smallerThan);
+			swap(data[0], data[k]);
+			adjustHeap(data, 0, k, compare);
 		}
 	}
 
 
-	// partition
-	// make array[left...right] to: array[left...c-1] <= array[c] <= array[c+1...right]
 	template<class T>
-	size_t Sort<T>::partition(T * _array, size_t left, size_t right, bool(*smallerThan)(const T & t1, const T & t2))
+	void Sort<T>::adjustHeap(T * data, size_t root, size_t size, int(*compare)(const T & left, const T & right))
 	{
-		size_t key = right;
-		if (left < right)
+		T e = data[root];
+		size_t j;
+		for (j = (root << 1) + 1; j < size; j = (j << 1) + 1)
 		{
-			size_t p = left, q = right;
-			T tmp;
-			while (p < q)
-			{
-				while (p < key && !smallerThan(_array[key], _array[p]))
-					p++;
-				if (p != key)
-				{
-					tmp = _array[p];
-					_array[p] = _array[key];
-					_array[key] = tmp;
-					key = p;
-					q--;
-				}
-				while (key < q && !smallerThan(_array[q], _array[key]))
-					q--;
-				if (q != key)
-				{
-					tmp = _array[q];
-					_array[q] = _array[key];
-					_array[key] = tmp;
-					key = q;
-					p++;
-				}
-			}
+			if (j < size - 1 && compare(data[j], data[j + 1]) < 0)
+				j++;
+			if (compare(e, data[j]) >= 0)
+				break;
+			data[(j - 1) >> 1] = data[j];
 		}
-		return key;
-	}
-
-
-	// inner implement of fast sort
-	template<class T>
-	void Sort<T>::fastImplement(T * _array, size_t left, size_t right, bool(*smallerThan)(const T & t1, const T & t2))
-	{
-		if (left < right)
-		{
-			size_t key = partition(_array, left, right, smallerThan);
-			if (left + 1 < key)
-				fastImplement(_array, left, key - 1, smallerThan);
-			if (key + 1 < right)
-				fastImplement(_array, key + 1, right, smallerThan);
-		}
-	}
-
-
-	// fast sort
-	template<class T>
-	void Sort<T>::fastSort(T * _array, size_t N, bool(*smallerThan)(const T & t1, const T & t2))
-	{
-		fastImplement(_array, 0, N - 1, smallerThan);
-	}
-
-
-	// winner sort
-	/*
-	N must be 2^k
-	*/
-	template<class T>
-	void Sort<T>::winnerSort(T * _array, size_t N, int(*compare)(const T & t1, const T & t2))
-	{
-		// 1. build winner tree
-		T * tree = new T[N << 1];
-		_Copy_impl(_array, _array + N, tree + N);
-		int t;
-		size_t l, r, index;
-		for (index = N - 1; index > 0; index--)
-		{
-			l = (index << 1);
-			r = l + 1;
-			t = compare(tree[l], tree[r]);
-			tree[index] = (t <= 0 ? tree[l] : tree[r]);
-		}
-
-		// 2. prepare infinite mark
-		bool * infinite = new bool[N << 1];
-		memset(infinite, 0, (N << 1));
-
-		// 3. prepare space for sorted data
-		T * sorted = new T[N];
-
-		// 4. start
-		sorted[0] = tree[1];
-		for (size_t k = 1; k < N; k++)
-		{
-			index = 1;
-			while (index < N)
-			{
-				l = (index << 1);
-				r = l + 1;
-				if (infinite[l])
-					index = r;
-				else if (infinite[r])
-					index = l;
-				else
-					index = (compare(tree[l], tree[r]) <= 0 ? l : r);
-			}
-			infinite[index] = true;
-			while (index != 1)
-			{
-				index = index / 2;
-				l = (index << 1);
-				r = l + 1;
-				if (infinite[l] && infinite[r])
-					infinite[index] = true;
-				else if (infinite[l] && !infinite[r])
-					tree[index] = tree[r];
-				else if (!infinite[l] && infinite[r])
-					tree[index] = tree[l];
-				else
-					tree[index] = (compare(tree[l], tree[r]) <= 0 ? tree[l] : tree[r]);
-			}
-			sorted[k] = tree[1];
-		}
-
-		// 5. sorted[] -> origin data[]
-		_Copy_impl(sorted, sorted + N, _array);
-
-		// 6. clean rubbish
-		delete[]tree;
-		delete[]infinite;
-		delete[]sorted;
+		data[(j - 1) >> 1] = e;
 	}
 
 }

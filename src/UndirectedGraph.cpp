@@ -255,7 +255,7 @@ namespace Seven
 				}
 			}
 		}
-		Sort<Edge>::fastSort(E, _edges, Edge::smallerThan);
+		Sort<Edge>::quickSort(E, _edges, Edge::compare);
 
 		UnionFindSets UFS(_vertices);
 

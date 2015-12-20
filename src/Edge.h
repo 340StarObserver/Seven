@@ -25,7 +25,7 @@ namespace Seven
 		void setWeight(int weight);
 
 		// compare:
-		static bool smallerThan(const Edge & left, const Edge & right);
+		static int compare(const Edge & left, const Edge & right);
 	};
 }
 
