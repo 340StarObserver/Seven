@@ -3,6 +3,9 @@
 
 using std::_Copy_impl;
 
+#include <xutility>
+using std::fill;
+
 namespace Seven
 {
 	// various strategys of sort
@@ -61,6 +64,29 @@ namespace Seven
 	
 		// heap sort
 		static void heapSort(T * data, size_t N, int(*compare)(const T & left, const T & right));
+
+		// shell sort
+		/*
+		1."data"     : list you want to sort
+		2."N"        : size of "data"
+		3."intervals": intervals you use in the shellsort. N > better intervals[i] > intervals[i+1]
+		4."m"        : size of "intervals"
+		5."compare"  : strategy to compare two elements
+		*/
+		static void shellSort(T * data, size_t N, size_t * intervals, size_t m, int(*compare)(const T & left, const T & right));
+	
+		// radix sort
+		/*
+		1."data" : list you want to sort
+		2."link" : the result order of elements, for example:
+			after the function,link[]={4,1,2,3,0},that is to say:
+			the sort result is: data[4],data[1],data[2],data[3],data[0]
+		3."d"    : the number of keys
+		4."r"    : the radix of each key
+		5."N"    : the size of "data"
+		6."digit": for example,digit(97,2,10) is to calculate the index of the 2st key in the 10 keys,that is 9
+		*/
+		static size_t radixSort(const T * data, size_t * link, size_t d, size_t r, size_t N, size_t(*digit)(const T & element, size_t index, size_t radix));
 	};
 
 
@@ -218,6 +244,80 @@ namespace Seven
 			data[(j - 1) >> 1] = data[j];
 		}
 		data[(j - 1) >> 1] = e;
+	}
+
+
+	/*
+	method:
+	1. swap elements by intervals, to create better environment for insert sort
+	2. insert sort
+	*/
+	template<class T>
+	void Sort<T>::shellSort(T * data, size_t N, size_t * intervals, size_t m, int(*compare)(const T & left, const T & right))
+	{
+		for (size_t k = 0; k < m; k++)
+		{
+			for (size_t i = 0; i + intervals[k] < N; i++)
+			{
+				if (compare(data[i], data[i + intervals[k]])>0)
+					swap(data[i], data[i + intervals[k]]);
+			}
+		}
+		insertSort(data, N, compare);
+	}
+
+
+	// radix sort
+	/*
+	1."data" : list you want to sort
+	2."link" : the result order of elements, for example:
+	after the function,link[]={4,1,2,3,0},that is to say:
+	the sort result is: data[4],data[1],data[2],data[3],data[0]
+	3."d"    : the number of keys
+	4."r"    : the radix of each key
+	5."N"    : the size of "data"
+	6."digit": for example,digit(97,2,10) is to calculate the index of the 2st key in the 10 keys,that is 9
+	*/
+	template<class T>
+	size_t Sort<T>::radixSort(const T * data, size_t * link, size_t d, size_t r, size_t N, size_t(*digit)(const T & element, size_t index, size_t radix))
+	{
+		size_t * front = new size_t[r];
+		size_t * end = new size_t[r];
+
+		size_t i, first = 0, current, k, j, last;
+		for (i = 0; i < N; i++)
+			link[i] = i + 1;
+
+		for (i = 0; i < d; i++)
+		{
+			fill(front, front + r, N);
+			for (current = first; current < N; current = link[current])
+			{
+				k = digit(data[current], i, r);
+				if (front[k] == N)
+					front[k] = current;
+				else
+					link[end[k]] = current;
+				end[k] = current;
+			}
+
+			for (j = 0; front[j] == N; j++);
+			first = front[j];
+			last = end[j];
+			for (k = j + 1; k < r; k++)
+			{
+				if (front[k] < N)
+				{
+					link[last] = front[k];
+					last = end[k];
+				}
+			}
+			link[last] = N;
+		}
+
+		delete[]front;
+		delete[]end;
+		return first;
 	}
 
 }
