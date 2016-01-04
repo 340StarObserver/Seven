@@ -32,7 +32,7 @@ namespace Seven
 	{
 	private:
 		AVLNode<K, V> * _root;  // the root of the AVL tree
-		size_t _size;           // the number of nodes
+		size_t _size;           // the number of useful nodes
 	private:
 		// delete a subtree whose root is "p"     (ok)
 		void del(AVLNode<K, V> * p);
@@ -47,10 +47,10 @@ namespace Seven
 		// construct an empty table               (ok)
 		TreeTable();
 
-		// get the size of the table              (ok)
+		// get the useful size of the table       (ok)
 		size_t size()const;
 
-		// whether the table is empty             (ok)
+		// whether the table has no useful pairs  (ok)
 		bool empty()const;
 
 		// clear the whole table                  (ok)
@@ -59,6 +59,9 @@ namespace Seven
 		// deconstructor                          (ok)
 		~TreeTable();
 
+
+		// judge whether has such a key           (ok)
+		bool contains(const K & key, int(*compare)(const K & left, const K & right))const;
 
 		// get the value by a given key           (ok)
 		V * get(const K & key, int(*compare)(const K & left, const K & right));
@@ -71,6 +74,9 @@ namespace Seven
 
 		// add a <key,value>                      (ok)
 		bool add(const K & key, const V & value, int(*compare)(const K & left, const K & right));
+
+		// remove a <key,value>                   (ok)
+		bool remove(const K & key, int(*compare)(const K & left, const K & right));
 
 	};
 
@@ -156,6 +162,23 @@ namespace Seven
 	}
 
 
+	// judge whether has such a key
+	template<class K,class V>
+	bool TreeTable<K, V>::contains(const K & key, int(*compare)(const K & left, const K & right))const
+	{
+		AVLNode<K, V> * p = _root;
+		int t;
+		while (p)
+		{
+			t = compare(key, p->getKey());
+			if (t == 0)
+				return p->getUseable();
+			p = (t < 0 ? p->getLeft() : p->getRight());
+		}
+		return false;
+	}
+
+
 	// get the value by a give key
 	/*
 	Tips:
@@ -171,7 +194,9 @@ namespace Seven
 	V * TreeTable<K, V>::get(const K & key, int(*compare)(const K & left, const K & right))
 	{
 		AVLNode<K, V> * p = find(key, compare);
-		return (p == nullptr ? nullptr : p->getValueAddress());
+		if (p && p->getUseable())
+			return p->getValueAddress();
+		return nullptr;
 	}
 
 
@@ -191,7 +216,7 @@ namespace Seven
 	bool TreeTable<K, V>::replace(const K & key, const V & value, int(*compare)(const K & left, const K & right))
 	{
 		AVLNode<K, V> * p = find(key, compare);
-		if (p){
+		if (p && p->getUseable()){
 			p->setValue(value);
 			return true;
 		}
@@ -269,9 +294,9 @@ namespace Seven
 	template<class K,class V>
 	bool TreeTable<K, V>::work(bool mode, const K & key, const V & value, int(*compare)(const K & left, const K & right))
 	{
-		if (_size == 0){
+		if (_root == nullptr){
 			_root = new AVLNode<K, V>(key, value);
-			_size = 1;
+			_size++;
 			return true;
 		}
 
@@ -285,9 +310,15 @@ namespace Seven
 			}
 			t = compare(key, p->getKey());
 			if (t == 0){
-				if (mode)
+				if (mode || p->getUseable() == false){
 					p->setValue(value);
-				return mode;
+					if (p->getUseable() == false){
+						p->setUseable(true);
+						_size++;
+					}
+					return true;
+				}
+				return false;
 			}
 			pp = p;
 			p = (t < 0 ? p->getLeft() : p->getRight());
@@ -377,6 +408,34 @@ namespace Seven
 		else
 			pa->setRight(b);
 		return true;
+	}
+
+
+	// remove a <key,value>
+	/*
+	Tips:
+	1. parameter "key" is the given key
+	2. parameter "compare" is the strategy how to compare two keys
+		compare(left,right) < 0 === left < right
+		compare(left,right) = 0 === left = right
+		compare(left,right) > 0 === left > right
+	3. if found     : it will remove it and return true
+	4. if not found : it will return false
+
+	Method:
+	it use lazy remove method,that is to say,
+	give the node a mark to note that this <key,value> is unuseable
+	*/
+	template<class K,class V>
+	bool TreeTable<K, V>::remove(const K & key, int(*compare)(const K & left, const K & right))
+	{
+		AVLNode<K, V> * p = find(key, compare);
+		if (p && p->getUseable()){
+			_size--;
+			p->setUseable(false);
+			return true;
+		}
+		return false;
 	}
 
 }

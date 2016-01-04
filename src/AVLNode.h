@@ -19,6 +19,7 @@ namespace Seven
 		K _key;                  // the key of pair
 		V _value;                // the value of pair
 		int _bf;                 // height(left tree) minus height(right tree)
+		bool _useable;           // whether pair is useable,false represents it has been removed
 		AVLNode<K, V> * _left;   // left child
 		AVLNode<K, V> * _right;  // right child
 	public:
@@ -64,6 +65,9 @@ namespace Seven
 		// get right child
 		AVLNode<K, V> * getRight()const;
 
+		// get whether this pair is useable
+		bool getUseable()const;
+
 
 		// set the key of pair
 		void setKey(const K & key);
@@ -80,6 +84,9 @@ namespace Seven
 		// set right child
 		void setRight(AVLNode<K, V> * right);
 
+		// set whether this pair is useable
+		void setUseable(bool useable);
+
 	};
 
 	//----------------------------------------
@@ -94,6 +101,7 @@ namespace Seven
 		cout << "value      : ";
 		valuePrinter(getValue());
 		cout << "bf         : " << getBf() << '\n';
+		cout << "useable    : " << (getUseable() ? "true" : "false") << '\n';
 		cout << "address    : " << (const void * const)this << '\n';
 		cout << "address(L) : " << (void *)getLeft() << '\n';
 		cout << "address(R) : " << (void *)getRight() << '\n';
@@ -108,8 +116,10 @@ namespace Seven
 		_key = key;
 		_value = value;
 		_bf = 0;
+		_useable = true;
 		_left = _right = nullptr;
 	}
+
 
 	// get the key of pair
 	template<class K,class V>
@@ -153,6 +163,13 @@ namespace Seven
 		return _right;
 	}
 
+	// get whether this pair is useable
+	template<class K,class V>
+	bool AVLNode<K, V>::getUseable()const
+	{
+		return _useable;
+	}
+
 
 	// set the key of pair
 	template<class K, class V>
@@ -187,6 +204,13 @@ namespace Seven
 	void AVLNode<K, V>::setRight(AVLNode<K, V> * right)
 	{
 		_right = right;
+	}
+
+	// set whether this pair is useable
+	template<class K, class V>
+	void AVLNode<K, V>::setUseable(bool useable)
+	{
+		_useable = useable;
 	}
 
 }
