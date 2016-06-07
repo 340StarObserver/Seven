@@ -6,6 +6,34 @@
 #include <cstring>
 using std::memset;
 
+/*
+I come up of two improve plans, if you are interested in, you can realize them, they are:
+
+1.	when visit(get or replace) one node, you can move this node to the head of that linked-list.
+Because in real environment, our program tend to visit several data very frequently. An advantage of
+this method is that you can find the data faster in the future.
+
+2.	combine N linked-list into one linkedlist. And in logic, use subsection, it can be seen as N lists.
+One advantage is you can deconstruct this hashtable faster, because you can push this big list into the
+HashPool with O(1) cost. Another advantage is your iterator will become easier and faster.
+*/
+
+/*
+我想了两个提升性能的方案，如果你有兴趣，可以实现它们，它们是:
+1.	当访问(查询or更新)某个结点的时候，你可以把这个结点移动到那条链表的头部。因为在真实环境下，程序往往会
+很频繁地访问少数的几项数据，这个方案的一个好处就是之后你可以更快地找到那些高频的数据。
+
+2.	把N条链表合成为一个大链表。但是又要保证在"逻辑上"仍然有N条链表，怎么办的?可以用分段的方法。
+比如，在构造哈希表的时候，就立即创建N个结点并把它们串成一个链表，形如:
+node0 -> node1 -> node2 ... -> nodeN-1
+然后创建一些指针，比如p0指向node0，q0指向node1，则p0到q0之间的这一段就是逻辑上的第一条链表的空间，
+之后往第一个桶里插入数据就直接插入到这一段区间里。
+这样的好处有两个:
+第一个好处是在析构哈希表的时候，你可以把整个一条大链表在O(1)时间内接到回收池里，而你在原来有N条链表时候则需要0(N)。
+第二个好处是你的迭代器的遍历变得更简单，真的变成了一条链表的遍历。
+*/
+
+// here is the current version
 namespace Seven
 {
 	// template of hash table
