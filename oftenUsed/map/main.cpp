@@ -18,6 +18,7 @@ using Seven::KeyNotFoundException;
 #include "HashMap.h"
 using Seven::HashNode;
 using Seven::HashPool;
+using Seven::HashMap;
 
 int main()
 {

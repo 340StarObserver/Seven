@@ -210,6 +210,48 @@ namespace Seven
 		}
 		return NULL;
 	}
+
+
+	/*
+	 * HashMap
+	 * < require >
+	 * 1. type K, V support default constructor
+	 * 2. type K, V support copy constructor
+	 * 3. type K, V support operator =
+	 */
+	template<class K, class V>
+	class HashMap : public Map<K, V>
+	{
+	private:
+		// algorithm for calc hash code
+		std::size_t (*_hash)(const K & key, std::size_t range);
+
+		// algorithm for compare two keys
+		int (*_cmp)(const K & lvs, const K & rvs);
+	private:
+		// the number of buckets
+		std::size_t _bucketNum;
+
+		// array with each element points to a bucket's head
+		HashNode<K, V> ** _heads;
+
+		// array with each element points to a bucket's tail
+		HashNode<K, V> ** _tails;
+	private:
+		HashMap(std::size_t bucketNum, std::size_t (*hash)(const K & key, std::size_t range), int (*cmp)(const K & lvs, const K & rvs));
+	public:
+		static HashMap<K, V> * create(std::size_t bucketNum, std::size_t (*hash)(const K & key, std::size_t range), int (*cmp)(const K & lvs, const K & rvs));
+		
+		~HashMap();
+
+		V get(const K & key)const;
+
+		void set(const K & key, const V & value);
+
+		bool exist(const K & key)const;
+
+		void remove(const K & key);
+	};
 }
 
 #endif
