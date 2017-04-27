@@ -1,7 +1,7 @@
 /*
 Author 		: 	Lv Yang
 Created 	: 	26 April 2017
-Modified 	: 	26 April 2017
+Modified 	: 	27 April 2017
 Version 	: 	1.0
 */
 
@@ -14,6 +14,8 @@ namespace Seven
 	class Map
 	{
 	public:
+		virtual ~Map(){};
+
 		virtual V get(const K & key)const=0;
 
 		virtual void set(const K & key, const V & value)=0;
