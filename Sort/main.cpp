@@ -1,7 +1,7 @@
 /*
  * Author 	: 	Lv Yang
- * Created 	: 	15 May 2017
- * Modified : 	15 May 2017
+ * Creat 	: 	15 May 2017
+ * Modify 	: 	15 May 2017
  * Version 	: 	1.0
  */
 
