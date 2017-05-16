@@ -1,6 +1,6 @@
 /*
  * Author 	: 	Lv Yang
- * Creat 	: 	15 May 2017
+ * Create 	: 	15 May 2017
  * Modify 	: 	15 May 2017
  * Version 	: 	1.0
  */

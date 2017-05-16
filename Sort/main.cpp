@@ -1,6 +1,6 @@
 /*
  * Author 	: 	Lv Yang
- * Creat 	: 	15 May 2017
+ * Create 	: 	15 May 2017
  * Modify 	: 	15 May 2017
  * Version 	: 	1.0
  */
@@ -21,6 +21,9 @@ using Seven::Sort;
 
 #include "FastSort.h"
 using Seven::FastSort;
+
+#include "HeapSort.h"
+using Seven::HeapSort;
 
 
 int cmp_int(const int & lhs, const int & rhs)
@@ -45,22 +48,36 @@ void print_int(const int * data, std::size_t n)
 }
 
 
+void test_case(const Sort<int> * handler)
+{
+	int data[] = {15, 2, 14, 13, 5, 6, 0, 3, 1, 16, 10, 17, 4, 11, 18, 7, 8, 12, 9, 19};
+	// int data[] = {19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+	std::size_t n = sizeof(data) / sizeof(int);
+
+	cout << "before sort :\n";
+	print_int(data, n);
+
+	handler->sort(data, n, cmp_int);
+
+	cout << "\nafter sort :\n";
+	print_int(data, n);
+}
+
+
 int main()
 {
 	// test FastSort<T>
 	{
-		int data[] = {15, 2, 14, 13, 5, 6, 0, 3, 1, 16, 10, 17, 4, 11, 18, 7, 8, 12, 9, 19};
-		std::size_t n = sizeof(data) / sizeof(int);
-
-		cout << "before sort :\n";
-		print_int(data, n);
-
 		Sort<int> * handler = new FastSort<int>();
-		handler->sort(data, n, cmp_int);
+		test_case(handler);
 		delete handler;
+	}
 
-		cout << "\nafter sort :\n";
-		print_int(data, n);
+	// test HeapSort<T>
+	{
+		Sort<int> * handler = new HeapSort<int>();
+		test_case(handler);
+		delete handler;
 	}
 
 	return 0;
