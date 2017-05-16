@@ -1,7 +1,7 @@
 /*
  * Author 	: 	Lv Yang
- * Create 	: 	15 May 2017
- * Modify 	: 	15 May 2017
+ * Create 	: 	16 May 2017
+ * Modify 	: 	16 May 2017
  * Version 	: 	1.0
  */
 
@@ -24,6 +24,9 @@ using Seven::FastSort;
 
 #include "HeapSort.h"
 using Seven::HeapSort;
+
+#include "MergeSort.h"
+using Seven::MergeSort;
 
 
 int cmp_int(const int & lhs, const int & rhs)
@@ -76,6 +79,13 @@ int main()
 	// test HeapSort<T>
 	{
 		Sort<int> * handler = new HeapSort<int>();
+		test_case(handler);
+		delete handler;
+	}
+
+	// test MergeSort<T>
+	{
+		Sort<int> * handler = new MergeSort<int>();
 		test_case(handler);
 		delete handler;
 	}
