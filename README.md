@@ -11,15 +11,10 @@
         FastSort<T>         HeapSort<T>       MergeSort<T>
     
     
-    2. 链表
-                              List<T>
-                                |
-                     -----------------------
-                     |                     |
-                SingleList<T>         DoubleList<T>
+    2. 链表  List<T>
     
     
-    3. 栈  Stack<T>
+    3. 栈　  Stack<T>
 
 
     4. 队列
@@ -27,7 +22,7 @@
                                 |
             ----------------------------------------
             |                   |                  |
-        CommonQueue<T>    PriorityQueue<T>    MaxMinQueue<T>
+        CommonQueue<T>    PriorityQueue<T>    MinMaxQueue<T>
 
 
     5. 映射
