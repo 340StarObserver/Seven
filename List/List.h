@@ -125,11 +125,12 @@ namespace Seven
 		void addHead(const T & value);
 		void addTail(const T & value);
 
+		/*
+		 * be careful to use function rmTail()
+		 * !-- its cost time is O(n)
+		 */
 		bool rmHead();
-		bool rmTail(); 		/*
-							 * be careful to use rmTail
-							 * !-- its cost time is O(n)
-							 */
+		bool rmTail();
 
 		bool updateHead(const T & value);
 		bool updateTail(const T & value);
