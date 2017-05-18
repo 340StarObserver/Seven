@@ -5,8 +5,8 @@
  * Version 	: 	1.0
  */
 
-#ifndef _SORT_H
-#define _SORT_H
+#ifndef _SEVEN_SORT_H
+#define _SEVEN_SORT_H
 
 namespace Seven
 {

@@ -5,8 +5,8 @@
  * Version 	: 	1.0
  */
 
-#ifndef _MERGESORT_H
-#define _MERGESORT_H
+#ifndef _SEVEN_MERGESORT_H
+#define _SEVEN_MERGESORT_H
 
 #include "Sort.h"
 

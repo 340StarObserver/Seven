@@ -5,8 +5,8 @@
  * Version 	: 	1.0
  */
 
-#ifndef _HEAPSORT_H
-#define _HEAPSORT_H
+#ifndef _SEVEN_HEAPSORT_H
+#define _SEVEN_HEAPSORT_H
 
 #include "Sort.h"
 

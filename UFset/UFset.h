@@ -5,8 +5,8 @@
  * Version 	: 	1.0
  */
 
-#ifndef _UFSET_H
-#define _UFSET_H
+#ifndef _SEVEN_UFSET_H
+#define _SEVEN_UFSET_H
 
 #include <cstring>
 

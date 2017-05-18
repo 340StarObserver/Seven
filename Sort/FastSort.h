@@ -5,8 +5,8 @@
  * Version 	: 	1.0
  */
 
-#ifndef _FASTSORT_H
-#define _FASTSORT_H
+#ifndef _SEVEN_FASTSORT_H
+#define _SEVEN_FASTSORT_H
 
 #include "Sort.h"
 
