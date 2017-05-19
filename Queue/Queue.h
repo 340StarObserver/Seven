@@ -43,9 +43,9 @@ namespace Seven
 		 *    mode = false : choose the min priority element
 		 */
 
-		virtual T front(bool mode) const = 0;
+		virtual T front(bool mode = true) const = 0;
 
-		virtual void pop(bool mode) = 0;
+		virtual void pop(bool mode = true) = 0;
 	};
 
 	class QueueEmptyException : public std::exception

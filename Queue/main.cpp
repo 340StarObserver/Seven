@@ -10,17 +10,32 @@ using std::cout;
 
 #include "Queue.h"
 using Seven::Queue;
-using Seven::QueueEmptyException;
+
+#include "CommonQueue.h"
+using Seven::CommonQueue;
 
 int main()
 {
-	Queue<int> * queue = NULL;
-	cout << (void *)queue << '\n';
+	// test CommonQueue<T>
+	{
+		Queue<int> * queue = new CommonQueue<int>();
+		for(int i = 1; i <= 5; i++)
+			queue->push(i);
 
-	try {
-		throw QueueEmptyException();
-	} catch(const std::exception & e) {
-		cout << e.what() << '\n';
+		while(queue->empty() == false)
+		{
+			int e = queue->front();
+			queue->pop();
+			cout << "pop : " << e << '\n';
+		}
+
+		try {
+			cout << "current queue head : " << queue->front() << '\n';
+		} catch(const std::exception & e) {
+			cout << e.what() << '\n';
+		}
+
+		delete queue;
 	}
 
 	return 0;
