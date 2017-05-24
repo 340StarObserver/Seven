@@ -1,7 +1,7 @@
 /*
  * Author 	: 	Lv Yang
  * Create 	: 	19 May 2017
- * Modify 	: 	19 May 2017
+ * Modify 	: 	24 May 2017
  * Version 	: 	1.0
  */
 
@@ -16,6 +16,9 @@ using Seven::CommonQueue;
 
 #include "PriorityQueue.h"
 using Seven::PriorityQueue;
+
+#include "MaxMinQueue.h"
+using Seven::MaxMinQueue;
 
 int cmp_int(const int & lhs, const int & rhs)
 {
@@ -72,6 +75,25 @@ int main()
 		} catch(const std::exception & e) {
 			cout << e.what() << '\n';
 		}
+
+		delete queue;
+
+		cout << "--------------------\n\n";
+	}
+
+	// test MaxMinQueue<T>
+	{
+		cout << "test MaxMinQueue<T>\n\n";
+
+		Queue<int> * queue = new MaxMinQueue<int>(cmp_int, 4, false);
+
+		int data[] = {5, 10, 0, 15, 12, 18, 30, 50, 22, 33};
+
+		for(int i = 0; i < sizeof(data) / sizeof(int); i++)
+			queue->push(data[i]);
+
+		cout << queue->front(true) << '\n';
+		cout << queue->front(false) << '\n';
 
 		delete queue;
 
