@@ -1,7 +1,7 @@
 /*
  * Author 	: 	Lv Yang
  * Create 	: 	24 May 2017
- * Modify 	: 	24 May 2017
+ * Modify 	: 	25 May 2017
  * Version 	: 	1.0
  */
 
@@ -42,6 +42,10 @@ namespace Seven
 		int (*_cmp)(const T & lhs, const T & rhs);
 
 	private:
+		/*
+		 * following several functions used in push
+		 */
+
 		// when queue is unfixed and full, expand the capacity
 		void expand();
 
@@ -53,6 +57,32 @@ namespace Seven
 
 		// whether node i is in max level
 		bool is_max_level(std::size_t i) const;
+
+	private:
+		/*
+		 * following several functions used in pop
+		 */
+
+		// pop max
+		void pop_max();
+
+		// pop min
+		void pop_min();
+
+		// swap two elements
+		void swap(T & lhs, T & rhs);
+
+		// idx of the max in i's childs, return 0 if not exist
+		std::size_t child_max(std::size_t i) const;
+
+		// idx of the min in i's childs, return 0 if not exist
+		std::size_t child_min(std::size_t i) const;
+
+		// idx of the max in i's grand childs, return 0 if not exist
+		std::size_t grand_max(std::size_t i) const;
+
+		// idx of the min in i's grand childs, return 0 if not exist
+		std::size_t grand_min(std::size_t i) const;
 
 	public:
 		MaxMinQueue(int (*cmp)(const T & lhs, const T & rhs), std::size_t capacity = 16, bool fixed = false);
@@ -212,8 +242,8 @@ namespace Seven
 	template<class T>
 	bool MaxMinQueue<T>::is_max_level(std::size_t i) const
 	{
-		// log2(i) is even
-		i = std::size_t(log10(i) / log10(2));
+		// i is in max level  <==>  log2(i) is even
+		i = std::size_t(std::log10(i) / std::log10(2));
 		i = i & 1;
 		return i == 0;
 	}
@@ -222,7 +252,145 @@ namespace Seven
 	template<class T>
 	void MaxMinQueue<T>::pop(bool mode)
 	{
-		// wait implement ...
+		if(mode)
+			pop_max();
+		else
+			pop_min();
+	}
+
+
+	template<class T>
+	void MaxMinQueue<T>::swap(T & lhs, T & rhs)
+	{
+		T tmp = lhs;
+		lhs = rhs;
+		rhs = tmp;
+	}
+
+
+	template<class T>
+	std::size_t MaxMinQueue<T>::child_max(std::size_t i) const
+	{
+		std::size_t c = (i << 1);
+		if(i > 0 && c <= _size)
+		{
+			if(c + 1 > _size || _cmp(_elements[c], _elements[c + 1]) >= 0)
+				return c;
+			return c + 1;
+		}
+		return 0;
+	}
+
+
+	template<class T>
+	std::size_t MaxMinQueue<T>::child_min(std::size_t i) const
+	{
+		std::size_t c = (i << 1);
+		if(i > 0 && c <= _size)
+		{
+			if(c + 1 > _size || _cmp(_elements[c], _elements[c + 1]) <= 0)
+				return c;
+			return c + 1;
+		}
+		return 0;
+	}
+
+
+	template<class T>
+	std::size_t MaxMinQueue<T>::grand_max(std::size_t i) const
+	{
+		std::size_t c = (i << 2);
+		if(i > 0 && c <= _size)
+		{
+			std::size_t p = c;
+			for(i = c + 1; i <= c + 3 && i <= _size; i++)
+			{
+				if(_cmp(_elements[p], _elements[i]) < 0)
+					p = i;
+			}
+			return p;
+		}
+		return 0;
+	}
+
+
+	template<class T>
+	std::size_t MaxMinQueue<T>::grand_min(std::size_t i) const
+	{
+		std::size_t c = (i << 2);
+		if(i > 0 && c <= _size)
+		{
+			std::size_t p = c;
+			for(i = c + 1; i <= c + 3 && i <= _size; i++)
+			{
+				if(_cmp(_elements[p], _elements[i]) > 0)
+					p = i;
+			}
+			return p;
+		}
+		return 0;
+	}
+
+
+	template<class T>
+	void MaxMinQueue<T>::pop_max()
+	{
+		if(_size == 0)
+			return;
+
+		_elements[1] = _elements[_size--];
+
+		std::size_t p = 1, q;
+		bool w = true;
+		while(w)
+		{
+			w = false;
+
+			q = child_max(p);
+			if(q != 0 && _cmp(_elements[p], _elements[q]) < 0)
+				this->swap(_elements[p], _elements[q]);
+
+			q = grand_max(p);
+			if(q != 0 && _cmp(_elements[p], _elements[q]) < 0)
+			{
+				this->swap(_elements[p], _elements[q]);
+				p = q;
+				w = true;
+			}
+		}
+	}
+
+
+	template<class T>
+	void MaxMinQueue<T>::pop_min()
+	{
+		if(_size <= 1)
+		{
+			_size = 0;
+			return;
+		}
+
+		std::size_t p = child_min(1);
+		_elements[p] = _elements[_size--];
+
+		std::size_t q;
+		bool w = true;
+		while(w)
+		{
+			w = false;
+
+			q = child_min(p);
+			if(q != 0 && _cmp(_elements[p], _elements[q]) > 0)
+				this->swap(_elements[p], _elements[q]);
+
+			q = grand_min(p);
+			if(q != 0 && _cmp(_elements[p], _elements[q]) > 0)
+			{
+				this->swap(_elements[p], _elements[q]);
+				p = q;
+				w = true;
+			}
+		}
 	}
 
 }

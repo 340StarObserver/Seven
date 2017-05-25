@@ -1,7 +1,7 @@
 /*
  * Author 	: 	Lv Yang
  * Create 	: 	19 May 2017
- * Modify 	: 	24 May 2017
+ * Modify 	: 	25 May 2017
  * Version 	: 	1.0
  */
 
@@ -20,12 +20,14 @@ using Seven::PriorityQueue;
 #include "MaxMinQueue.h"
 using Seven::MaxMinQueue;
 
+
 int cmp_int(const int & lhs, const int & rhs)
 {
 	if(lhs < rhs) return -1;
 	if(lhs > rhs) return 1;
 	return 0;
 }
+
 
 int main()
 {
@@ -55,6 +57,7 @@ int main()
 		cout << "--------------------\n\n";
 	}
 
+
 	// test PriorityQueue<T>
 	{
 		cout << "test PriorityQueue<T>\n\n";
@@ -81,6 +84,7 @@ int main()
 		cout << "--------------------\n\n";
 	}
 
+
 	// test MaxMinQueue<T>
 	{
 		cout << "test MaxMinQueue<T>\n\n";
@@ -88,12 +92,40 @@ int main()
 		Queue<int> * queue = new MaxMinQueue<int>(cmp_int, 4, false);
 
 		int data[] = {5, 10, 0, 15, 12, 18, 30, 50, 22, 33};
-
 		for(int i = 0; i < sizeof(data) / sizeof(int); i++)
 			queue->push(data[i]);
 
-		cout << queue->front(true) << '\n';
-		cout << queue->front(false) << '\n';
+		try {
+			int e = queue->front(true);
+			queue->pop(true);
+			cout << "pop max : " << e << '\n';
+		} catch(const std::exception & e) {
+			cout << e.what() << '\n';
+		}
+
+		try {
+			int e = queue->front(false);
+			queue->pop(false);
+			cout << "pop min : " << e << '\n';
+		} catch(const std::exception & e) {
+			cout << e.what() << '\n';
+		}
+
+		try {
+			int e = queue->front(true);
+			queue->pop(true);
+			cout << "pop max : " << e << '\n';
+		} catch(const std::exception & e) {
+			cout << e.what() << '\n';
+		}
+
+		try {
+			int e = queue->front(false);
+			queue->pop(false);
+			cout << "pop min : " << e << '\n';
+		} catch(const std::exception & e) {
+			cout << e.what() << '\n';
+		}
 
 		delete queue;
 
